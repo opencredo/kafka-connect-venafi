@@ -38,7 +38,7 @@
 			<artifactId>junit-jupiter-engine</artifactId>
 			<version>${junit-5.version}</version>
 			<scope>test</scope>
-        </dependency>
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
