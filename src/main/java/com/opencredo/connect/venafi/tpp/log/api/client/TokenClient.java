@@ -39,6 +39,10 @@ public class TokenClient {
 
 
     private static GsonDecoder customDecoder() {
-        return new GsonDecoder(new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).registerTypeAdapter(ZonedDateTime.class, new DotNetDateDeserializer()).create());
+        return new GsonDecoder(
+                new GsonBuilder()
+                        .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                        .registerTypeAdapter(ZonedDateTime.class, new DotNetDateDeserializer())
+                        .create());
     }
 }

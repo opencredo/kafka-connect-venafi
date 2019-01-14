@@ -201,7 +201,7 @@ public class EventLog {
                 .put(SEVERITY, getSeverity())
                 .put(SOURCE_IP, getSourceIP());
 
-        if(getEventId() != null){
+        if (getEventId() != null) {
             tppLog.put(EVENT_ID, getEventId());
         }
 

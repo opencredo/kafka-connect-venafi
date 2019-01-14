@@ -1,6 +1,5 @@
 package com.opencredo.connect.venafi.tpp.log.model;
 
-import com.opencredo.connect.venafi.tpp.log.model.EventLog;
 
 import java.util.List;
 

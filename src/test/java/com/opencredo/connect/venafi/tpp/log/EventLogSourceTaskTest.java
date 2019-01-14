@@ -38,7 +38,7 @@ public class EventLogSourceTaskTest {
     public static final String TODAY = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
     @Test
-    public void As_a_client_I_want_a_token() {
+    public void as_a_client_I_want_a_token() {
 
 
         given_the_mock_will_respond_to_auth();
@@ -50,7 +50,7 @@ public class EventLogSourceTaskTest {
     }
 
     @Test
-    public void As_a_client_I_want_some_logs() {
+    public void as_a_client_I_want_some_logs() {
 
 
         given_the_mock_will_respond_to_auth();
@@ -65,7 +65,7 @@ public class EventLogSourceTaskTest {
     }
 
     @Test
-    public void As_a_connector_I_want_to_pass_an_object_as_a_struct() {
+    public void as_a_connector_I_want_to_pass_an_object_as_a_struct() {
         Struct struct = new Struct(TppLogSchema())
                 .put(CLIENT_TIMESTAMP, new Date())
                 .put(COMPONENT, COMPONENT)

@@ -14,17 +14,15 @@ import java.util.Map;
 
 public class TppLogSourceConnector extends SourceConnector {
     public static final String BASE_URL_CONFIG = "BASE_URL";
-    public static final String PORT = "PORT";
     public static final String TOPIC_CONFIG = "TOPIC";
     public static final String BATCH_SIZE = "BATCH_SIZE";
     public static final String POLL_INTERVAL = "POLL_INTERVAL";
     private static final Logger log = LoggerFactory.getLogger(TppLogSourceConnector.class);
     private static ConfigDef CONFIG_DEF = new ConfigDef()
-            .define(BASE_URL_CONFIG, ConfigDef.Type.STRING, "https://112218183.dev.lab.venafi.com/vedsdk", ConfigDef.Importance.HIGH, "Url to TPP box with /VEDSDK")
+            .define(BASE_URL_CONFIG, ConfigDef.Type.STRING, "https://the-vedsdk-URL-that-have.com:443/vedsdk", ConfigDef.Importance.HIGH, "Url to TPP box with /VEDSDK")
             .define(TOPIC_CONFIG, ConfigDef.Type.STRING, "TPP-LOGS", ConfigDef.Importance.HIGH, "TOPIC to publish data to.")
             .define(BATCH_SIZE, ConfigDef.Type.INT, 10, ConfigDef.Importance.LOW, "Window of data to pull from log api.")
-            .define(POLL_INTERVAL, ConfigDef.Type.INT, 1000, ConfigDef.Importance.LOW, "Poll interval in milliseconds.")
-            .define(PORT,ConfigDef.Type.INT,80,ConfigDef.Importance.MEDIUM,"Port of TPP endpoint");
+            .define(POLL_INTERVAL, ConfigDef.Type.INT, 1000, ConfigDef.Importance.LOW, "Poll interval in milliseconds.");
     private String baseUrl;
     private String topic;
     private String batchSize;

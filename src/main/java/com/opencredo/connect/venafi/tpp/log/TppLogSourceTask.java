@@ -20,6 +20,7 @@ public class TppLogSourceTask extends SourceTask {
     public static final String URL = "url";
     public static final String LAST_READ = "last_read";
     public static final String DEFAULT_FROM_TIME = "2018-05-04T00:00:00.0000000Z";
+    private static ZonedDateTime staticOffset;
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(TppLogSourceConnector.class);
     private String baseUrl;
     private String topic;
@@ -55,20 +56,26 @@ public class TppLogSourceTask extends SourceTask {
         String token = getToken();
         String fromDate = DEFAULT_FROM_TIME;
 
-        Map<String, Object> offset = context.offsetStorageReader().offset(Collections.singletonMap(URL, baseUrl));
+        Map<String, Object> offset = context.offsetStorageReader()
+                .offset(Collections.singletonMap(URL, baseUrl));
         if (offset != null) {
             ZonedDateTime lastRecordedOffset = (ZonedDateTime) offset.get(LAST_READ);
             if (lastRecordedOffset != null) {
                 fromDate = lastRecordedOffset.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             }
+        }else if(staticOffset != null){
+                fromDate = staticOffset.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         }
 
         List<EventLog> jsonLogs = getTppLogs(token, fromDate);
         ArrayList<SourceRecord> records = new ArrayList<>();
         for (EventLog eventLog : jsonLogs) {
             Map<String, Object> sourcePartition = Collections.singletonMap(URL, baseUrl);
-            Map<String, Object> sourceOffset = Collections.singletonMap(LAST_READ, eventLog.getClientTimestamp());
-            records.add(new SourceRecord(sourcePartition, sourceOffset, topic, EventLog.TppLogSchema(), eventLog.toStruct()));
+            Map<String, Object> sourceOffset = Collections
+                    .singletonMap(LAST_READ, eventLog.getClientTimestamp());
+            staticOffset = eventLog.getClientTimestamp();
+            records.add(new SourceRecord(sourcePartition, sourceOffset, topic,
+                    EventLog.TppLogSchema(), eventLog.toStruct()));
         }
 
         return records;
