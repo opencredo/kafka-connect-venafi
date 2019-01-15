@@ -22,7 +22,7 @@ public interface TppLog {
 
     default LogResponse getLogs(String token, String fromTime, String limit) {
         Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put(FROM_TIME, fromTime);
+        queryParams.put(FROM_TIME, fromTime.replaceAll("\\+","%2B"));
         queryParams.put(LIMIT, limit);
         queryParams.put(ORDER, ORDERING);
         return getLogs(token, queryParams);
