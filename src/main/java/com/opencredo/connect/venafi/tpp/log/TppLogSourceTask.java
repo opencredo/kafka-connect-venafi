@@ -21,7 +21,7 @@ public class TppLogSourceTask extends SourceTask {
     public static final String LAST_READ = "last_read";
     public static final String DEFAULT_FROM_TIME = "2018-05-04T00:00:00.0000000Z";
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(TppLogSourceConnector.class);
-    private static ZonedDateTime staticOffset;
+    private ZonedDateTime staticOffset;
     private String baseUrl;
     private String topic;
     private String batchSize;
@@ -56,13 +56,11 @@ public class TppLogSourceTask extends SourceTask {
         String token = getToken();
         String fromDate = DEFAULT_FROM_TIME;
 
-        Map<String, Object> offset = context.offsetStorageReader()
-                .offset(Collections.singletonMap(URL, baseUrl));
+        log.info("Trying to get offset.");
+        Map<String, Object> offset = context.offsetStorageReader().offset(Collections.singletonMap(URL, baseUrl));
+        log.info("The offset is {}",offset);
         if (offset != null) {
-            ZonedDateTime lastRecordedOffset = (ZonedDateTime) offset.get(LAST_READ);
-            if (lastRecordedOffset != null) {
-                fromDate = lastRecordedOffset.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            }
+            fromDate =  (String) offset.get(LAST_READ);
         } else if (staticOffset != null) {
             fromDate = staticOffset.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         }
@@ -71,11 +69,12 @@ public class TppLogSourceTask extends SourceTask {
         ArrayList<SourceRecord> records = new ArrayList<>();
         for (EventLog eventLog : jsonLogs) {
             Map<String, Object> sourcePartition = Collections.singletonMap(URL, baseUrl);
-            Map<String, Object> sourceOffset = Collections
-                    .singletonMap(LAST_READ, eventLog.getClientTimestamp());
+            Map<String, Object> sourceOffset = Collections.singletonMap(
+                    LAST_READ,
+                    eventLog.getClientTimestamp().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+            );
             staticOffset = eventLog.getClientTimestamp();
-            records.add(new SourceRecord(sourcePartition, sourceOffset, topic,
-                    EventLog.TppLogSchema(), eventLog.toStruct()));
+            records.add(new SourceRecord(sourcePartition, sourceOffset, topic, EventLog.TppLogSchema(), eventLog.toStruct()));
         }
 
         return records;
