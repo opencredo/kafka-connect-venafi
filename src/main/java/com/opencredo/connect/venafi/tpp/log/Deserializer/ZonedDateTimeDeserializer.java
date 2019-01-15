@@ -35,7 +35,6 @@ public class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime
         try {
             return ZonedDateTime.parse(dateTimeString + "Z");
         } catch (DateTimeParseException up) {
-            //swallow exception for now
             log.error("Failed to parse to ZonedDateTime format with added Z.", up);
             throw up;
         }
