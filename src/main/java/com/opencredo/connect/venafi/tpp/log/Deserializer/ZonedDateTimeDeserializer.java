@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
@@ -21,7 +21,7 @@ public class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime
 
     private static ZonedDateTime getParsedDate(String dateTimeString) {
         try {
-            return LocalDateTime.parse(dateTimeString).atZone(ZoneId.systemDefault());
+            return LocalDateTime.parse(dateTimeString).atZone(ZoneOffset.UTC);
         } catch (DateTimeParseException e) {
             //swallow exception for now
             log.error("Failed to parse to LocalDateTime format", e);

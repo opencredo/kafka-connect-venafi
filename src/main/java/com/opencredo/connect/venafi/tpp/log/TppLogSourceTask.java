@@ -74,6 +74,7 @@ public class TppLogSourceTask extends SourceTask {
                     eventLog.getClientTimestamp().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
             );
             staticOffset = eventLog.getClientTimestamp();
+            log.info(" The staticOffset is {}.",staticOffset.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
             records.add(new SourceRecord(sourcePartition, sourceOffset, topic, EventLog.TppLogSchema(), eventLog.toStruct()));
         }
 
