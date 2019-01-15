@@ -14,7 +14,7 @@ public interface TppLog {
     String FROM_TIME = "FromTime";
     String LIMIT = "Limit";
     String ORDER = "Order";
-    String ORDERING = "-ServerTimestamp";
+    String ORDERING = "ServerTimestamp";
 
     @RequestLine("GET /Log")
     @Headers({"Content-Type: application/json", "X-Venafi-Api-Key: {token}"})
