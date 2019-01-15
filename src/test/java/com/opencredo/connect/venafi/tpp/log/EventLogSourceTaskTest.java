@@ -2,6 +2,7 @@ package com.opencredo.connect.venafi.tpp.log;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
 import com.opencredo.connect.venafi.tpp.log.model.EventLog;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
@@ -23,7 +24,12 @@ import static org.junit.jupiter.api.Assertions.*;
 public class EventLogSourceTaskTest {
 
     public static final String TODAY = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-    public WireMockServer wireMockServer = new WireMockServer(new WireMockConfiguration().dynamicPort());
+    public WireMockServer wireMockServer = new WireMockServer(
+            new WireMockConfiguration()
+                    .dynamicPort()
+                    .extensions(
+                            new ResponseTemplateTransformer(false)
+                    ));
 
     @BeforeEach
     private void setup() {
@@ -117,7 +123,7 @@ public class EventLogSourceTaskTest {
                 .willReturn(aResponse().withBody("{\n" +
                         "    \"LogEvents\": [\n" +
                         "        {\n" +
-                        "            \"ClientTimestamp\": \"2018-11-23T12:22:37.7700000\",\n" +
+                        "            \"ClientTimestamp\": \"{{now}}\",\n" +
                         "            \"Component\": \"\\\\VED\\\\Policy\\\\certificates\\\\_Discovered\\\\TrustNet\\\\defaultwebsite.lab.venafi.com - 83\",\n" +
                         "            \"ComponentId\": 123185,\n" +
                         "            \"ComponentSubsystem\": \"Config\",\n" +
@@ -125,7 +131,7 @@ public class EventLogSourceTaskTest {
                         "            \"Grouping\": 0,\n" +
                         "            \"Id\": 1835016,\n" +
                         "            \"Name\": \"Certificate Revocation - CRL Failure\",\n" +
-                        "            \"ServerTimestamp\": \"2018-11-23T12:22:37.9570000\",\n" +
+                        "            \"ServerTimestamp\": \"{{now}}\",\n" +
                         "            \"Severity\": \"Info\",\n" +
                         "            \"SourceIP\": \"[::1]\",\n" +
                         "            \"Text1\": \"CN=traininglab-Root-CA, DC=traininglab, DC=local\",\n" +
@@ -134,7 +140,7 @@ public class EventLogSourceTaskTest {
                         "            \"Value2\": 0\n" +
                         "        }\n" +
                         "    ]\n" +
-                        "}")
+                        "}").withTransformers("response-template")
                 ));
     }
 
