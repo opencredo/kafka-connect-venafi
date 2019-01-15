@@ -22,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class EventLogSourceTaskTest {
 
+    public static final String TODAY = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     public WireMockServer wireMockServer = new WireMockServer(new WireMockConfiguration().dynamicPort());
 
     @BeforeEach
@@ -33,9 +34,6 @@ public class EventLogSourceTaskTest {
     private void shutdown() {
         wireMockServer.shutdown();
     }
-
-
-    public static final String TODAY = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 
     @Test
     public void as_a_client_I_want_a_token() {

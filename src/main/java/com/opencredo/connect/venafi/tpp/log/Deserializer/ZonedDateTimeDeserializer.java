@@ -4,6 +4,8 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
@@ -11,7 +13,33 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 
+
+//TODO test DESERIALIZERS
 public class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime> {
+
+    private static final Logger log = LoggerFactory.getLogger(ZonedDateTimeDeserializer.class);
+
+    private static ZonedDateTime getParsedDate(String dateTimeString) {
+        try {
+            return ZonedDateTime.parse(dateTimeString);
+        } catch (DateTimeParseException e) {
+            //swallow exception for now
+            log.error("Failed to parse to LocalDateTime format", e);
+        }
+        try {
+            return LocalDateTime.parse(dateTimeString).atZone(ZoneId.systemDefault());
+        } catch (DateTimeParseException e) {
+            //swallow exception for now
+            log.error("Failed to parse to LocalDateTime format", e);
+        }
+        try {
+            return ZonedDateTime.parse(dateTimeString + "Z");
+        } catch (DateTimeParseException up) {
+            //swallow exception for now
+            log.error("Failed to parse to ZonedDateTime format with added Z.", up);
+            throw up;
+        }
+    }
 
     @Override
     public ZonedDateTime deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
@@ -21,33 +49,5 @@ public class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime
         String json = jsonElement.getAsString();
 
         return getParsedDate(json);
-    }
-
-    private static ZonedDateTime getParsedDate(String dateTimeString) {
-        ZonedDateTime dateTime = null;
-        try {
-            dateTime = ZonedDateTime.parse(dateTimeString);
-        } catch (DateTimeParseException e) {
-            //swallow exception for now
-            System.out.println(e.getMessage() + "/\n" + e.getStackTrace());
-        }
-        if (dateTime == null) {
-            try {
-                dateTime = LocalDateTime.parse(dateTimeString).atZone(ZoneId.systemDefault());
-            } catch (DateTimeParseException e) {
-                //swallow exception for now
-                System.out.println(e.getMessage() + "/\n" + e.getStackTrace());
-            }
-        }
-
-        try {
-            dateTime = ZonedDateTime.parse(dateTimeString + "Z");
-        } catch (DateTimeParseException e) {
-            //swallow exception for now
-            System.out.println(e.getMessage() + "/\n" + e.getStackTrace());
-        }
-
-
-        return dateTime;
     }
 }

@@ -20,8 +20,8 @@ public class TppLogSourceTask extends SourceTask {
     public static final String URL = "url";
     public static final String LAST_READ = "last_read";
     public static final String DEFAULT_FROM_TIME = "2018-05-04T00:00:00.0000000Z";
-    private static ZonedDateTime staticOffset;
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(TppLogSourceConnector.class);
+    private static ZonedDateTime staticOffset;
     private String baseUrl;
     private String topic;
     private String batchSize;
@@ -63,8 +63,8 @@ public class TppLogSourceTask extends SourceTask {
             if (lastRecordedOffset != null) {
                 fromDate = lastRecordedOffset.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
             }
-        }else if(staticOffset != null){
-                fromDate = staticOffset.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+        } else if (staticOffset != null) {
+            fromDate = staticOffset.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         }
 
         List<EventLog> jsonLogs = getTppLogs(token, fromDate);

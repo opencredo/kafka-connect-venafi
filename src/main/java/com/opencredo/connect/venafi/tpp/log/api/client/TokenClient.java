@@ -19,9 +19,8 @@ public class TokenClient {
     private static ZonedDateTime tokenExpiry = ZonedDateTime.now();
 
     public static String getToken(String baseUrl) {
-        if (tokenValue == null || !tokenExpiry.isBefore(ZonedDateTime.now().minusSeconds(10L))) {
+        if (isTokenInvalid()) {
             Credentials credentials = new Credentials("rufus", "qxaag{q,h=g$9~!e");
-//            Feign.builder().
             TppToken token = Feign
                     .builder()
                     .encoder(new GsonEncoder())
@@ -35,6 +34,10 @@ public class TokenClient {
         }
         return tokenValue;
 
+    }
+
+    private static boolean isTokenInvalid() {
+        return tokenValue == null || !tokenExpiry.isBefore(ZonedDateTime.now().minusSeconds(10L));
     }
 
 

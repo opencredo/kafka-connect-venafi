@@ -4,6 +4,8 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.time.Instant;
@@ -12,13 +14,17 @@ import java.time.ZonedDateTime;
 
 public class DotNetDateDeserializer implements JsonDeserializer<ZonedDateTime> {
 
+    public static final int SLASH_DATE_LENGTH = "/DATE(".length();
+    public static final int CLOSE_BRACKET_SLASH_LENGTH = ")/".length();
+
+
     @Override
     public ZonedDateTime deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
         if (jsonElement.isJsonNull()) {
             return null;
         }
         String json = jsonElement.getAsString();
-        String dateString = json.substring(6, json.length() - 2);
+        String dateString = json.substring(SLASH_DATE_LENGTH, json.length() - CLOSE_BRACKET_SLASH_LENGTH);
         ZoneOffset offset = ZoneOffset.UTC;
 
         if (dateString.contains("+")) {
