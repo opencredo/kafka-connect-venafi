@@ -21,17 +21,19 @@ public class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime
 
     private static ZonedDateTime getParsedDate(String dateTimeString) {
         try {
-            return ZonedDateTime.parse(dateTimeString);
-        } catch (DateTimeParseException e) {
-            //swallow exception for now
-            log.error("Failed to parse to LocalDateTime format", e);
-        }
-        try {
             return LocalDateTime.parse(dateTimeString).atZone(ZoneId.systemDefault());
         } catch (DateTimeParseException e) {
             //swallow exception for now
             log.error("Failed to parse to LocalDateTime format", e);
         }
+
+        try {
+            return ZonedDateTime.parse(dateTimeString);
+        } catch (DateTimeParseException e) {
+            //swallow exception for now
+            log.error("Failed to parse to ZonedDateTime format", e);
+        }
+
         try {
             return ZonedDateTime.parse(dateTimeString + "Z");
         } catch (DateTimeParseException up) {

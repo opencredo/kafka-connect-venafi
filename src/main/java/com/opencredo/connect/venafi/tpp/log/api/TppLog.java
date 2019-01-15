@@ -13,6 +13,8 @@ public interface TppLog {
 
     String FROM_TIME = "FromTime";
     String LIMIT = "Limit";
+    String ORDER = "Order";
+    String ORDERING = "-ServerTimestamp";
 
     @RequestLine("GET /Log")
     @Headers({"Content-Type: application/json", "X-Venafi-Api-Key: {token}"})
@@ -22,6 +24,7 @@ public interface TppLog {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put(FROM_TIME, fromTime);
         queryParams.put(LIMIT, limit);
+        queryParams.put(ORDER, ORDERING);
         return getLogs(token, queryParams);
     }
 }
