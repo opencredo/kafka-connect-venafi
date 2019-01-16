@@ -77,7 +77,7 @@ public class EventLogSourceTaskTest {
                 .put(COMPONENT_SUBSYSTEM, COMPONENT_SUBSYSTEM)
                 .put(EVENT_ID, EVENT_ID)
                 .put(GROUPING, 123)
-                .put(ID, 123)
+                .put(ID, 123L)
                 .put(NAME, NAME)
                 .put(SERVER_TIMESTAMP, new Date())
                 .put(SEVERITY, SEVERITY)

@@ -13,13 +13,11 @@ import java.time.ZonedDateTime;
 public class LogsClient {
 
     public static LogResponse getLogs(String token, String date, String baseUrl, String batchSize) {
-        LogResponse logResponse =
-                Feign.builder()
-                        .logger(new Slf4jLogger())
-                        .decoder(logDecoder())
-                        .target(TppLog.class, baseUrl)
-                        .getLogs(token, date, batchSize);
-        return logResponse;
+        return Feign.builder()
+                    .logger(new Slf4jLogger())
+                    .decoder(logDecoder())
+                    .target(TppLog.class, baseUrl)
+                    .getLogs(token, date, batchSize);
     }
 
     private static GsonDecoder logDecoder() {

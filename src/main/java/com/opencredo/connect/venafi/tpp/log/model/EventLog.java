@@ -30,11 +30,11 @@ public class EventLog {
             .name(EventLog.class.getSimpleName())
             .field(CLIENT_TIMESTAMP, Timestamp.SCHEMA)
             .field(COMPONENT, Schema.STRING_SCHEMA)
-            .field(COMPONENT_ID, Schema.INT32_SCHEMA)
-            .field(COMPONENT_SUBSYSTEM, Schema.STRING_SCHEMA)
+            .field(COMPONENT_ID, Schema.OPTIONAL_INT32_SCHEMA)
+            .field(COMPONENT_SUBSYSTEM, Schema.OPTIONAL_STRING_SCHEMA)
             .field(EVENT_ID, Schema.OPTIONAL_STRING_SCHEMA)
             .field(GROUPING, Schema.INT32_SCHEMA)
-            .field(ID, Schema.INT32_SCHEMA)
+            .field(ID, Schema.INT64_SCHEMA)
             .field(NAME, Schema.STRING_SCHEMA)
             .field(SERVER_TIMESTAMP, Timestamp.SCHEMA)
             .field(SEVERITY, Schema.STRING_SCHEMA)
@@ -52,7 +52,7 @@ public class EventLog {
     private Integer ComponentId;
     private String ComponentSubsystem;
     private Integer Grouping;
-    private Integer Id;
+    private Long Id;
     private String EventId;
     private String Name;
     private String Data;
@@ -117,11 +117,11 @@ public class EventLog {
         Grouping = grouping;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return Id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         Id = id;
     }
 
@@ -202,8 +202,6 @@ public class EventLog {
         Struct tppLog = new Struct(TppLogSchema())
                 .put(CLIENT_TIMESTAMP, Date.from(getClientTimestamp().toInstant()))
                 .put(COMPONENT, getComponent())
-                .put(COMPONENT_ID, getComponentId())
-                .put(COMPONENT_SUBSYSTEM, getComponentSubsystem())
 
                 .put(GROUPING, getGrouping())
                 .put(ID, getId())
@@ -233,6 +231,13 @@ public class EventLog {
         if (getData() != null) {
             tppLog.put(DATA, getData());
         }
+        if(getComponentId() != null) {
+            tppLog.put(COMPONENT_ID, getComponentId());
+        }
+        if(getComponentSubsystem() != null) {
+            tppLog.put(COMPONENT_SUBSYSTEM, getComponentSubsystem());
+        }
+
         return tppLog;
     }
 
