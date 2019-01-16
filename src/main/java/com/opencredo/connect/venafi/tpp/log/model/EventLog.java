@@ -17,6 +17,7 @@ public class EventLog {
     public static final String ID = "Id";
     public static final String EVENT_ID = "EventId";
     public static final String NAME = "Name";
+    public static final String DATA = "Data";
     public static final String SERVER_TIMESTAMP = "ServerTimestamp";
     public static final String SEVERITY = "Severity";
     public static final String SOURCE_IP = "SourceIP";
@@ -42,6 +43,7 @@ public class EventLog {
             .field(TEXT_2, Schema.OPTIONAL_STRING_SCHEMA)
             .field(VALUE_1, Schema.OPTIONAL_INT32_SCHEMA)
             .field(VALUE_2, Schema.OPTIONAL_INT32_SCHEMA)
+            .field(DATA,Schema.OPTIONAL_STRING_SCHEMA)
             .build();
 
 
@@ -53,6 +55,7 @@ public class EventLog {
     private Integer Id;
     private String EventId;
     private String Name;
+    private String Data;
     private ZonedDateTime ServerTimestamp;
     private String Severity;
     private String SourceIP;
@@ -186,6 +189,14 @@ public class EventLog {
         Value2 = value2;
     }
 
+    public String getData() {
+        return Data;
+    }
+
+    public void setData(String data) {
+        Data = data;
+    }
+
     public Struct toStruct() {
 
         Struct tppLog = new Struct(TppLogSchema())
@@ -219,6 +230,9 @@ public class EventLog {
             tppLog.put(VALUE_2, getValue2());
         }
 
+        if (getData() != null) {
+            tppLog.put(DATA, getData());
+        }
         return tppLog;
     }
 

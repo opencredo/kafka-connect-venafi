@@ -41,7 +41,10 @@ public class TppLogSourceTask extends SourceTask {
         interval = Long.parseLong(props.get(TppLogSourceConnector.POLL_INTERVAL));
 
         log.info("Trying to get offset.");
-        Map<String, Object> offset = context.offsetStorageReader().offset(Collections.singletonMap(URL, baseUrl));
+        Map<String, Object> offset = null;
+        if (context != null && context.offsetStorageReader() != null) {
+            offset = context.offsetStorageReader().offset(Collections.singletonMap(URL, baseUrl));
+        }
         log.info("The offset is {}", offset);
         if (offset != null) {
             staticOffset = (String) offset.get(LAST_READ);
