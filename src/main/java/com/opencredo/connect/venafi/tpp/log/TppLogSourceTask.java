@@ -26,6 +26,7 @@ public class TppLogSourceTask extends SourceTask {
     private String batchSize;
     private Long interval;
     private Long last_execution = 0L;
+    private TokenClient tokenClient = new TokenClient();
 
 
     @Override
@@ -91,7 +92,7 @@ public class TppLogSourceTask extends SourceTask {
     }
 
     String getToken() {
-        return TokenClient.getToken(baseUrl);
+        return tokenClient.getToken(baseUrl);
     }
 
     @Override
