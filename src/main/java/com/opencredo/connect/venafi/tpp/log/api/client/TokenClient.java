@@ -15,10 +15,10 @@ import java.time.ZonedDateTime;
 
 public class TokenClient {
 
-    private static String tokenValue;
-    private static ZonedDateTime tokenExpiry = ZonedDateTime.now();
+    private String tokenValue;
+    private ZonedDateTime tokenExpiry = ZonedDateTime.now();
 
-    public static String getToken(String baseUrl) {
+    public String getToken(String baseUrl) {
         if (isTokenInvalid()) {
             Credentials credentials = new Credentials("rufus", "qxaag{q,h=g$9~!e");
             TppToken token = Feign
@@ -36,7 +36,7 @@ public class TokenClient {
 
     }
 
-    private static boolean isTokenInvalid() {
+    private boolean isTokenInvalid() {
         return tokenValue == null || !tokenExpiry.isBefore(ZonedDateTime.now().minusSeconds(10L));
     }
 
