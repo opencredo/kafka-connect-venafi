@@ -69,6 +69,21 @@ public class EventLogSourceTaskTest {
     }
 
     @Test
+    public void as_a_client_I_want_to_paginate_logs() {
+
+
+        given_the_mock_will_respond_to_auth();
+        given_the_mock_will_respond_to_log();
+        TppLogSourceTask task = given_a_task_is_setup();
+
+        String token = when_a_token_is_got(task);
+        List<EventLog> logs = when_the_logs_are_got(task, token);
+        assertNotNull(logs);
+        assertNotEquals(Collections.emptyList(), logs);
+        assertEquals(1, logs.size());
+    }
+
+    @Test
     public void as_a_connector_I_want_to_pass_an_object_as_a_struct() {
         Struct struct = new Struct(TppLogSchema())
                 .put(CLIENT_TIMESTAMP, new Date())
@@ -91,7 +106,7 @@ public class EventLogSourceTaskTest {
     }
 
     public List<EventLog> when_the_logs_are_got(TppLogSourceTask task, String token) {
-        return task.getTppLogs(token, TODAY);
+        return task.getTppLogs(token, TODAY, 0);
     }
 
     public TppLogSourceTask given_a_task_is_setup() {
