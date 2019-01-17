@@ -24,20 +24,20 @@ public class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime
             return LocalDateTime.parse(dateTimeString).atZone(ZoneOffset.UTC);
         } catch (DateTimeParseException e) {
             //swallow exception for now
-            log.error("Failed to parse to LocalDateTime format", e);
+            log.debug("Failed to parse to LocalDateTime format", e);
         }
 
         try {
             return ZonedDateTime.parse(dateTimeString);
         } catch (DateTimeParseException e) {
             //swallow exception for now
-            log.error("Failed to parse to ZonedDateTime format", e);
+            log.debug("Failed to parse to ZonedDateTime format", e);
         }
 
         try {
             return ZonedDateTime.parse(dateTimeString + "Z");
         } catch (DateTimeParseException up) {
-            log.error("Failed to parse to ZonedDateTime format with added Z.", up);
+            log.debug("Failed to parse to ZonedDateTime format with added Z.", up);
             throw up;
         }
     }

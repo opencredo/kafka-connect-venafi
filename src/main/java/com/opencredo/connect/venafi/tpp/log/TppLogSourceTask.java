@@ -40,7 +40,7 @@ public class TppLogSourceTask extends SourceTask {
         batchSize = props.get(TppLogSourceConnector.BATCH_SIZE);
         interval = Long.parseLong(props.get(TppLogSourceConnector.POLL_INTERVAL));
 
-        log.info("Trying to get persistedMap.");
+        log.debug("Trying to get persistedMap.");
         Map<String, Object> persistedMap = null;
         if (context != null && context.offsetStorageReader() != null) {
             persistedMap = context.offsetStorageReader().offset(Collections.singletonMap(URL, baseUrl));
@@ -84,7 +84,7 @@ public class TppLogSourceTask extends SourceTask {
             loopOffset = calculateLoopOffset(loopOffset, newFromDate, fromDate);
             fromDate = newFromDate;
 
-            log.info(" The fromDate is now {}.", fromDate);
+            log.debug(" The fromDate is now {}.", fromDate);
             records.add(buildSourceRecord(eventLog, fromDate, apiOffset));
         }
         apiOffset = calculateApiOffset(loopOffset, jsonLogs);
