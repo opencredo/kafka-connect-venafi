@@ -3,7 +3,6 @@ package com.opencredo.connect.venafi.tpp.log;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
-import com.opencredo.connect.venafi.tpp.log.model.EventLog;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTaskContext;
@@ -33,19 +32,18 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class EventLogSourceTaskTest {
 
-    public static final String TODAY = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-    ZonedDateTime TODAY_PLUS_ONE = ZonedDateTime.now().plusSeconds(1);
-    ZonedDateTime TODAY_PLUS_TWO = TODAY_PLUS_ONE.plusSeconds(1);
-    ZonedDateTime TODAY_PLUS_THREE = TODAY_PLUS_TWO.plusSeconds(1);
-    ZonedDateTime TODAY_PLUS_FOUR = TODAY_PLUS_THREE.plusSeconds(1);
-    ZonedDateTime TODAY_PLUS_FIVE = TODAY_PLUS_FOUR.plusSeconds(1);
-    ZonedDateTime TODAY_PLUS_SIX = TODAY_PLUS_FIVE.plusSeconds(1);
-    ZonedDateTime TODAY_PLUS_SEVEN = TODAY_PLUS_SIX.plusSeconds(1);
-    ZonedDateTime TODAY_PLUS_EIGHT = TODAY_PLUS_SEVEN.plusSeconds(1);
-    ZonedDateTime TODAY_PLUS_NINE = TODAY_PLUS_EIGHT.plusSeconds(1);
+    private final ZonedDateTime TODAY = ZonedDateTime.now();
+
+    ZonedDateTime getTodayPlus(int seconds) {
+        return TODAY.plusSeconds(seconds);
+    }
+
+    String getStringOfTodayPlus(int seconds) {
+        return getTodayPlus(seconds).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+    }
 
 
-    public WireMockServer wireMockServer = new WireMockServer(
+    private WireMockServer wireMockServer = new WireMockServer(
             new WireMockConfiguration()
                     .dynamicPort()
                     .extensions(
@@ -76,29 +74,19 @@ public class EventLogSourceTaskTest {
 
     @Test
     public void as_a_task_I_want_a_valid_context() {
-        SourceTaskContext mockSourceTaskContext = Mockito.mock(SourceTaskContext.class);
-        OffsetStorageReader mockOffsetStorageReader = Mockito.mock(OffsetStorageReader.class);
-        Map<String, Object> config = new HashMap<>(2);
-        config.put(LAST_READ, TODAY_PLUS_TWO.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-        config.put(LAST_API_OFFSET, 1);
-        Mockito.when(mockOffsetStorageReader.offset(Mockito.anyMap())).thenReturn(config);
-        Mockito.when(mockSourceTaskContext.offsetStorageReader()).thenReturn(mockOffsetStorageReader);
+        SourceTaskContext mockSourceTaskContext = given_a_mock_source_context_with(getTodayPlus(2), 1);
 
         given_the_mock_will_respond_to_auth();
-        given_the_mock_will_respond_to_log();
+        given_the_mock_will_respond_to_log_for_offsetsStorage();
 
-        TppLogSourceTask task = new TppLogSourceTask();
-        task.initialize(mockSourceTaskContext);
-        task.start(getTaskConfig());
+        TppLogSourceTask task = given_a_task_is_setup_with(mockSourceTaskContext);
 
 
-        List<SourceRecord> logs = task.poll();
-        assertNotNull(logs);
-        assertEquals(3, logs.size());
+        List<SourceRecord> sourceRecords1 = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(sourceRecords1, 3);
 
-        List<SourceRecord> logs2 = task.poll();
-        assertNotNull(logs);
-        assertEquals(1, logs2.size());
+        List<SourceRecord> sourceRecords2 = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(sourceRecords2, 1);
     }
 
     @Test
@@ -109,11 +97,8 @@ public class EventLogSourceTaskTest {
         given_the_mock_will_respond_to_log();
         TppLogSourceTask task = given_a_task_is_setup();
 
-        String token = when_a_token_is_got(task);
-        List<EventLog> logs = when_the_logs_are_got(task, token);
-        assertNotNull(logs);
-        assertNotEquals(Collections.emptyList(), logs);
-        assertEquals(5, logs.size());
+        List<SourceRecord> logs = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(logs, 2);
     }
 
     @Test
@@ -121,29 +106,22 @@ public class EventLogSourceTaskTest {
 
 
         given_the_mock_will_respond_to_auth();
-        given_the_mock_will_respond_to_log();
+        given_the_mock_will_respond_to_log_for_windowing();
         TppLogSourceTask task = given_a_task_is_setup();
 
-        List<SourceRecord> logs = task.poll();
-        assertNotNull(logs);
-        assertEquals(5, logs.size());
+        List<SourceRecord> page_1_of_logs = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(page_1_of_logs, 5);
         //get next page
-        List<SourceRecord> page_2_of_logs = task.poll();
-        assertNotNull(page_2_of_logs);
-        assertEquals(5, page_2_of_logs.size());
-        assertEquals(5, getCountOfLogsWithLastRead(TODAY_PLUS_FIVE, page_2_of_logs));
+        List<SourceRecord> page_2_of_logs = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(page_2_of_logs, 5);
+        then_the_number_of_logs_with_timestamp_is(5, page_2_of_logs, getTodayPlus(5));
         //get next Page
-        List<SourceRecord> page_3_of_logs = task.poll();
-        assertNotNull(page_3_of_logs);
-        assertEquals(4, page_3_of_logs.size());
+        List<SourceRecord> page_3_of_logs = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(page_3_of_logs, 4);
+        then_the_number_of_logs_with_timestamp_is(2, page_3_of_logs, getTodayPlus(6));
 
-        List<SourceRecord> page_4_of_logs = task.poll();
-        assertNotNull(page_4_of_logs);
-        assertEquals(2, page_4_of_logs.size());
-    }
-
-    private long getCountOfLogsWithLastRead(ZonedDateTime date, List<SourceRecord> page_2_of_logs) {
-        return page_2_of_logs.stream().filter(sourceRecord -> date.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME).equals(sourceRecord.sourceOffset().get(LAST_READ))).count();
+        List<SourceRecord> page_4_of_logs = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(page_4_of_logs, 2);
     }
 
     @Test
@@ -164,19 +142,51 @@ public class EventLogSourceTaskTest {
         System.out.println(record);
     }
 
-    public String when_a_token_is_got(TppLogSourceTask task) {
+
+    private List<SourceRecord> when_the_task_is_polled(TppLogSourceTask task) {
+        return task.poll();
+    }
+
+    private SourceTaskContext given_a_mock_source_context_with(ZonedDateTime lastReadDate, Integer lastApiOffset) {
+        SourceTaskContext mockSourceTaskContext = Mockito.mock(SourceTaskContext.class);
+        OffsetStorageReader mockOffsetStorageReader = Mockito.mock(OffsetStorageReader.class);
+        Map<String, Object> config = new HashMap<>(2);
+        config.put(LAST_READ, lastReadDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+        config.put(LAST_API_OFFSET, lastApiOffset);
+        Mockito.when(mockOffsetStorageReader.offset(Mockito.anyMap())).thenReturn(config);
+        Mockito.when(mockSourceTaskContext.offsetStorageReader()).thenReturn(mockOffsetStorageReader);
+        return mockSourceTaskContext;
+    }
+
+    private void then_the_number_of_logs_with_timestamp_is(int count, List<SourceRecord> page_of_logs, ZonedDateTime todayPlus) {
+        assertEquals(count, getCountOfLogsWithLastRead(todayPlus, page_of_logs));
+    }
+
+    private void then_the_logs_are_of_size(List<SourceRecord> page_3_of_logs, int i) {
+        assertNotNull(page_3_of_logs);
+        assertEquals(i, page_3_of_logs.size());
+    }
+
+    private long getCountOfLogsWithLastRead(ZonedDateTime date, List<SourceRecord> page_2_of_logs) {
+        return page_2_of_logs.stream().filter(sourceRecord -> date.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME).equals(sourceRecord.sourceOffset().get(LAST_READ))).count();
+    }
+
+    private String when_a_token_is_got(TppLogSourceTask task) {
         return task.getToken();
     }
 
-    public List<EventLog> when_the_logs_are_got(TppLogSourceTask task, String token) {
-        return task.getTppLogs(token, TODAY, 0);
-    }
-
-    public TppLogSourceTask given_a_task_is_setup() {
+    private TppLogSourceTask given_a_task_is_setup_with(SourceTaskContext context) {
         TppLogSourceTask task = new TppLogSourceTask();
         Map<String, String> config = getTaskConfig();
+        if (context != null) {
+            task.initialize(context);
+        }
         task.start(config);
         return task;
+    }
+
+    private TppLogSourceTask given_a_task_is_setup() {
+        return given_a_task_is_setup_with(null);
     }
 
     private Map<String, String> getTaskConfig() {
@@ -188,7 +198,7 @@ public class EventLogSourceTaskTest {
         return config;
     }
 
-    public void given_the_mock_will_respond_to_auth() {
+    private void given_the_mock_will_respond_to_auth() {
         wireMockServer.stubFor(post(urlPathEqualTo("/authorize/"))
                 .withRequestBody(equalToJson("{\n" +
                         "\t\"Username\":\"rufus\",\n" +
@@ -201,72 +211,92 @@ public class EventLogSourceTaskTest {
                 ));
     }
 
-    public void given_the_mock_will_respond_to_log() {
+    private void given_the_mock_will_respond_to_log() {
 
 
         wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))//.withQueryParam(FROM_TIME, equalTo(TODAY_PLUS_SIX.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)))
                 .willReturn(aResponse().withBody("{\n" +
                         "    \"LogEvents\": [\n" +
-                        createLogEventBody(TODAY_PLUS_ONE) + "," +
-                        createLogEventBody(TODAY_PLUS_TWO) + "," +
-                        createLogEventBody(TODAY_PLUS_THREE) + "," +
-                        createLogEventBody(TODAY_PLUS_FOUR) + "," +
-                        createLogEventBody(TODAY_PLUS_FIVE) +
+                        createLogEventBody(getTodayPlus(1)) + "," +
+                        createLogEventBody(getTodayPlus(2)) +
+                        "    ]\n" +
+                        "}")
+                ));
+
+    }
+
+    private void given_the_mock_will_respond_to_log_for_windowing() {
+
+
+        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))//.withQueryParam(FROM_TIME, equalTo(TODAY_PLUS_SIX.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)))
+                .willReturn(aResponse().withBody("{\n" +
+                        "    \"LogEvents\": [\n" +
+                        createLogEventBody(getTodayPlus(1)) + "," +
+                        createLogEventBody(getTodayPlus(2)) + "," +
+                        createLogEventBody(getTodayPlus(3)) + "," +
+                        createLogEventBody(getTodayPlus(4)) + "," +
+                        createLogEventBody(getTodayPlus(5)) +
                         "    ]\n" +
                         "}")
                 ));
         wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
-                .withQueryParam(FROM_TIME, equalTo(TODAY_PLUS_FIVE.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)))
+                .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(5)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(1)))
                 .willReturn(aResponse().withBody("{\n" +
                         "    \"LogEvents\": [\n" +
-                        createLogEventBody(TODAY_PLUS_FIVE) + "," +
-                        createLogEventBody(TODAY_PLUS_FIVE) + "," +
-                        createLogEventBody(TODAY_PLUS_FIVE) + "," +
-                        createLogEventBody(TODAY_PLUS_FIVE) + "," +
-                        createLogEventBody(TODAY_PLUS_FIVE) +
+                        createLogEventBody(getTodayPlus(5)) + "," +
+                        createLogEventBody(getTodayPlus(5)) + "," +
+                        createLogEventBody(getTodayPlus(5)) + "," +
+                        createLogEventBody(getTodayPlus(5)) + "," +
+                        createLogEventBody(getTodayPlus(5)) +
                         "    ]\n" +
                         "}")
                 ));
         wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
-                .withQueryParam(FROM_TIME, equalTo(TODAY_PLUS_FIVE.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)))
+                .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(5)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(6)))
                 .willReturn(aResponse().withBody("{\n" +
                         "    \"LogEvents\": [\n" +
-                        createLogEventBody(TODAY_PLUS_FIVE) + "," +
-                        createLogEventBody(TODAY_PLUS_SIX) + "," +
-                        createLogEventBody(TODAY_PLUS_SIX) + "," +
-                        createLogEventBody(TODAY_PLUS_SEVEN) +
+                        createLogEventBody(getTodayPlus(5)) + "," +
+                        createLogEventBody(getTodayPlus(6)) + "," +
+                        createLogEventBody(getTodayPlus(6)) + "," +
+                        createLogEventBody(getTodayPlus(7)) +
                         "    ]\n" +
                         "}")
                 ));
+        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+                .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(7)))
+                .withQueryParam(OFFSET, equalTo(String.valueOf(1)))
+                .willReturn(aResponse().withBody("{\n" +
+                        "    \"LogEvents\": [\n" +
+                        createLogEventBody(getTodayPlus(8)) + "," +
+                        createLogEventBody(getTodayPlus(9)) +
+                        "    ]\n" +
+                        "}")
+                ));
+
+
+    }
+
+    private void given_the_mock_will_respond_to_log_for_offsetsStorage() {
 
         wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
-                .withQueryParam(FROM_TIME, equalTo(TODAY_PLUS_SEVEN.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)))
+                .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(2)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(1)))
                 .willReturn(aResponse().withBody("{\n" +
                         "    \"LogEvents\": [\n" +
-                        createLogEventBody(TODAY_PLUS_EIGHT) + "," +
-                        createLogEventBody(TODAY_PLUS_NINE) +
+                        createLogEventBody(getTodayPlus(8)) + "," +
+                        createLogEventBody(getTodayPlus(9)) + "," +
+                        createLogEventBody(getTodayPlus(9)) +
                         "    ]\n" +
                         "}")
                 ));
-
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og")).withQueryParam(FROM_TIME, equalTo(TODAY_PLUS_TWO.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)))
-                .withQueryParam(OFFSET, equalTo(String.valueOf(1)))
-                .willReturn(aResponse().withBody("{\n" +
-                        "    \"LogEvents\": [\n" +
-                        createLogEventBody(TODAY_PLUS_EIGHT) + "," +
-                        createLogEventBody(TODAY_PLUS_NINE) + "," +
-                        createLogEventBody(TODAY_PLUS_NINE) +
-                        "    ]\n" +
-                        "}")
-                ));
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og")).withQueryParam(FROM_TIME, equalTo(TODAY_PLUS_NINE.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)))
+        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+                .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(9)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(2)))
                 .willReturn(aResponse().withBody("{\n" +
                         "    \"LogEvents\": [\n" +
-                        createLogEventBody(TODAY_PLUS_NINE) +
+                        createLogEventBody(getTodayPlus(9)) +
                         "    ]\n" +
                         "}")
                 ));
