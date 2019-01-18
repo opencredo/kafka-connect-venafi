@@ -16,7 +16,7 @@ public class TppLogSourceTask extends SourceTask {
     public static final String URL = "url";
     public static final String LAST_READ = "last_read";
     public static final String LAST_API_OFFSET = "last_api_offset";
-    public static final String DEFAULT_FROM_TIME = "2018-05-04T00:00:00.0000000Z";
+    public static final String DEFAULT_FROM_TIME = "1984-05-04T00:00:00.0000000Z";
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(TppLogSourceConnector.class);
     private String fromDate = DEFAULT_FROM_TIME;
     private String baseUrl;
@@ -48,7 +48,7 @@ public class TppLogSourceTask extends SourceTask {
         log.info("The persistedMap is {}", persistedMap);
         if (persistedMap != null) {
             String lastRead = (String) persistedMap.get(LAST_READ);
-            if (isNotBlank(lastRead)) {
+            if (isNotNullOrBlank(lastRead)) {
                 fromDate = (String) persistedMap.get(LAST_READ);
             }
 
@@ -56,11 +56,10 @@ public class TppLogSourceTask extends SourceTask {
         }
     }
 
-    public static boolean isNotBlank(String str) {
-        return str == null || str.isEmpty();
+    public static boolean isNotNullOrBlank(String str) {
+        return str == null || str.trim().isEmpty();
     }
 
-    //THIS LOOPS 4 CHRISTIAN
     @Override
     public List<SourceRecord> poll() {
         if (System.currentTimeMillis() > (last_execution + interval)) {
