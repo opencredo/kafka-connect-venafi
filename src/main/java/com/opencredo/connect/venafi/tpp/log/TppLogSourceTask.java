@@ -27,6 +27,9 @@ public class TppLogSourceTask extends SourceTask {
     private Long last_execution = 0L;
     private TokenClient tokenClient = new TokenClient();
 
+    public static boolean isNotNullOrBlank(String str) {
+        return str != null && !str.trim().isEmpty();
+    }
 
     @Override
     public String version() {
@@ -53,16 +56,12 @@ public class TppLogSourceTask extends SourceTask {
             }
 
             Integer lastApiOffset = (Integer) persistedMap.get(LAST_API_OFFSET);
-            if(lastApiOffset != null){
+            if (lastApiOffset != null) {
                 apiOffset = lastApiOffset;
             }
 
 
         }
-    }
-
-    public static boolean isNotNullOrBlank(String str) {
-        return str != null && !str.trim().isEmpty();
     }
 
     @Override

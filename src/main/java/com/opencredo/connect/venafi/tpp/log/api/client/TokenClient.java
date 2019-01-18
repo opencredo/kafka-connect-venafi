@@ -18,6 +18,14 @@ public class TokenClient {
     private String tokenValue;
     private ZonedDateTime tokenExpiry = ZonedDateTime.now();
 
+    private static GsonDecoder customDecoder() {
+        return new GsonDecoder(
+                new GsonBuilder()
+                        .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                        .registerTypeAdapter(ZonedDateTime.class, new DotNetDateDeserializer())
+                        .create());
+    }
+
     public String getToken(String baseUrl) {
         if (isTokenInvalid()) {
             Credentials credentials = new Credentials("rufus", "qxaag{q,h=g$9~!e");
@@ -38,14 +46,5 @@ public class TokenClient {
 
     private boolean isTokenInvalid() {
         return tokenValue == null || !tokenExpiry.isBefore(ZonedDateTime.now().minusSeconds(10L));
-    }
-
-
-    private static GsonDecoder customDecoder() {
-        return new GsonDecoder(
-                new GsonBuilder()
-                        .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
-                        .registerTypeAdapter(ZonedDateTime.class, new DotNetDateDeserializer())
-                        .create());
     }
 }

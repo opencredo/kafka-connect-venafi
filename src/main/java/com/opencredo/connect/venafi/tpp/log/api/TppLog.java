@@ -27,7 +27,7 @@ public interface TppLog {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put(FROM_TIME, fromTime);
         queryParams.put(LIMIT, limit);
-        queryParams.put(OFFSET,offset);
+        queryParams.put(OFFSET, offset);
         queryParams.put(ORDER, ORDERING);
         return getLogs(token, queryParams);
     }

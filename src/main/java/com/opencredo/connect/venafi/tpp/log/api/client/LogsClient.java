@@ -14,10 +14,10 @@ public class LogsClient {
 
     public static LogResponse getLogs(String token, String date, String baseUrl, String batchSize, int offset) {
         return Feign.builder()
-                    .logger(new Slf4jLogger())
-                    .decoder(logDecoder())
-                    .target(TppLog.class, baseUrl)
-                    .getLogs(token, date, batchSize, offset );
+                .logger(new Slf4jLogger())
+                .decoder(logDecoder())
+                .target(TppLog.class, baseUrl)
+                .getLogs(token, date, batchSize, offset);
     }
 
     private static GsonDecoder logDecoder() {

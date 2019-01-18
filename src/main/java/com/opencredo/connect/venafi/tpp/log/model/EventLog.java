@@ -43,7 +43,7 @@ public class EventLog {
             .field(TEXT_2, Schema.OPTIONAL_STRING_SCHEMA)
             .field(VALUE_1, Schema.OPTIONAL_INT32_SCHEMA)
             .field(VALUE_2, Schema.OPTIONAL_INT32_SCHEMA)
-            .field(DATA,Schema.OPTIONAL_STRING_SCHEMA)
+            .field(DATA, Schema.OPTIONAL_STRING_SCHEMA)
             .build();
 
 
@@ -213,11 +213,9 @@ public class EventLog {
         if (getEventId() != null) {
             tppLog.put(EVENT_ID, getEventId());
         }
-
         if (getText1() != null) {
             tppLog.put(TEXT_1, getText1());
         }
-
         if (getText2() != null) {
             tppLog.put(TEXT_2, getText2());
         }
@@ -227,14 +225,13 @@ public class EventLog {
         if (getValue2() != null) {
             tppLog.put(VALUE_2, getValue2());
         }
-
         if (getData() != null) {
             tppLog.put(DATA, getData());
         }
-        if(getComponentId() != null) {
+        if (getComponentId() != null) {
             tppLog.put(COMPONENT_ID, getComponentId());
         }
-        if(getComponentSubsystem() != null) {
+        if (getComponentSubsystem() != null) {
             tppLog.put(COMPONENT_SUBSYSTEM, getComponentSubsystem());
         }
 

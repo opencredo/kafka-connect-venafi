@@ -2,7 +2,6 @@ package com.opencredo.connect.venafi.tpp.log;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTaskContext;
@@ -33,6 +32,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class EventLogSourceTaskTest {
 
     private final ZonedDateTime TODAY = ZonedDateTime.now();
+    private WireMockServer wireMockServer = new WireMockServer(
+            new WireMockConfiguration().dynamicPort()
+    );
 
     ZonedDateTime getTodayPlus(int seconds) {
         return TODAY.plusSeconds(seconds);
@@ -41,14 +43,6 @@ public class EventLogSourceTaskTest {
     String getStringOfTodayPlus(int seconds) {
         return getTodayPlus(seconds).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
-
-
-    private WireMockServer wireMockServer = new WireMockServer(
-            new WireMockConfiguration()
-                    .dynamicPort()
-                    .extensions(
-                            new ResponseTemplateTransformer(false)
-                    ));
 
     @BeforeEach
     private void setup() {
