@@ -49,7 +49,12 @@ public class TppLogSourceTask extends SourceTask {
         if (persistedMap != null) {
             String lastRead = (String) persistedMap.get(LAST_READ);
             if (isNotNullOrBlank(lastRead)) {
-                fromDate = (String) persistedMap.get(LAST_READ);
+                fromDate = lastRead;
+            }
+
+            Integer lastApiOffset = (Integer) persistedMap.get(LAST_API_OFFSET);
+            if(lastApiOffset != null){
+                apiOffset = lastApiOffset;
             }
 
 
@@ -57,7 +62,7 @@ public class TppLogSourceTask extends SourceTask {
     }
 
     public static boolean isNotNullOrBlank(String str) {
-        return str == null || str.trim().isEmpty();
+        return str != null && !str.trim().isEmpty();
     }
 
     @Override
