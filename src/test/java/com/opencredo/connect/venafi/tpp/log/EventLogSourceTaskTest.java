@@ -2,6 +2,7 @@ package com.opencredo.connect.venafi.tpp.log;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTaskContext;
@@ -21,8 +22,7 @@ import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.opencredo.connect.venafi.tpp.log.TppLogSourceConnector.*;
-import static com.opencredo.connect.venafi.tpp.log.TppLogSourceTask.LAST_API_OFFSET;
-import static com.opencredo.connect.venafi.tpp.log.TppLogSourceTask.LAST_READ;
+import static com.opencredo.connect.venafi.tpp.log.TppLogSourceTask.*;
 import static com.opencredo.connect.venafi.tpp.log.api.TppLog.FROM_TIME;
 import static com.opencredo.connect.venafi.tpp.log.api.TppLog.OFFSET;
 import static com.opencredo.connect.venafi.tpp.log.model.EventLog.*;
@@ -34,6 +34,7 @@ public class EventLogSourceTaskTest {
     private final ZonedDateTime TODAY = ZonedDateTime.now();
     private WireMockServer wireMockServer = new WireMockServer(
             new WireMockConfiguration().dynamicPort()
+                    .extensions(new ResponseTemplateTransformer(false))
     );
 
     ZonedDateTime getTodayPlus(int seconds) {
@@ -67,6 +68,36 @@ public class EventLogSourceTaskTest {
     }
 
     @Test
+    public void as_a_client_I_want_a_token_to_only_generate_once_while_before_token_expiry() {
+
+
+        given_the_mock_will_respond_to_auth();
+        TppLogSourceTask task = given_a_task_is_setup();
+
+        String token = when_a_token_is_got(task);
+        assertTrue(isNotNullOrBlank(token));
+        String token2 = when_a_token_is_got(task);
+        assertTrue(isNotNullOrBlank(token2));
+        assertEquals(token, token2);
+        wireMockServer.verify(1, postRequestedFor(urlPathMatching("/[Aa]uthorize/?")));
+    }
+
+    @Test
+    public void as_a_client_I_want_a_token_to_only_regenerate_while_away_token_expiry() {
+        given_the_mock_will_respond_to_auth_with_expired_token();
+        TppLogSourceTask task = given_a_task_is_setup();
+
+        String invalidToken = when_a_token_is_got(task);
+        assertTrue(isNotNullOrBlank(invalidToken));
+        String invalidToken2 = when_a_token_is_got(task);
+        assertTrue(isNotNullOrBlank(invalidToken2));
+        wireMockServer.verify(2, postRequestedFor(urlPathMatching("/[Aa]uthorize/?")));
+        assertNotEquals(invalidToken, invalidToken2);
+
+    }
+
+
+    @Test
     public void as_a_task_I_want_a_valid_context() {
         SourceTaskContext mockSourceTaskContext = given_a_mock_source_context_with(getTodayPlus(2), 1);
 
@@ -94,6 +125,19 @@ public class EventLogSourceTaskTest {
         List<SourceRecord> logs = when_the_task_is_polled(task);
         then_the_logs_are_of_size(logs, 2);
     }
+
+    @Test
+    public void as_a_client_I_want_some_logs_and_handle_token_expiry() {
+
+        given_the_mock_will_respond_to_auth();
+//        given_the_mock_will_respond_to_log();
+        given_the_mock_will_respond_to_log_as_expired_token();
+        TppLogSourceTask task = given_a_task_is_setup();
+
+        List<SourceRecord> logs = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(logs, 2);
+    }
+
 
     @Test
     public void as_a_client_I_want_to_paginate_logs() {
@@ -193,37 +237,57 @@ public class EventLogSourceTaskTest {
     }
 
     private void given_the_mock_will_respond_to_auth() {
-        wireMockServer.stubFor(post(urlPathEqualTo("/authorize/"))
+        wireMockServer.stubFor(post(urlPathMatching("/[Aa]uthorize/?"))
                 .withRequestBody(equalToJson("{\n" +
                         "\t\"Username\":\"rufus\",\n" +
                         "\t\"Password\":\"qxaag{q,h=g$9~!e\"\n" +
                         "}")).withHeader("Content-Type", containing("application/json"))
-                .willReturn(aResponse().withBody("{\n" +
-                        "    \"APIKey\": \"" + UUID.randomUUID() + "\",\n" +
-                        "    \"ValidUntil\": \"/Date(" + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + ")/\"\n" +
-                        "}")
+                .willReturn(okJson("{\n" +
+                        "    \"APIKey\": \"{{randomValue type='UUID'}}\",\n" +
+                        "    \"ValidUntil\": \"/Date(" + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + "000)/\"\n" +
+                        "}").withTransformers("response-template")
+                ));
+    }
+
+    private void given_the_mock_will_respond_to_auth_with_expired_token() {
+        wireMockServer.stubFor(post(urlPathMatching("/[Aa]uthorize/?"))
+                .withRequestBody(equalToJson("{\n" +
+                        "\t\"Username\":\"rufus\",\n" +
+                        "\t\"Password\":\"qxaag{q,h=g$9~!e\"\n" +
+                        "}")).withHeader("Content-Type", containing("application/json"))
+                .willReturn(okJson("{\n" +
+                        "    \"APIKey\": \"{{randomValue type='UUID'}}\",\n" +
+                        "    \"ValidUntil\": \"/Date(" + LocalDateTime.now().minusMinutes(3).toEpochSecond(ZoneOffset.UTC) + "000)/\"\n" +
+                        "}").withTransformers("response-template")
                 ));
     }
 
     private void given_the_mock_will_respond_to_log() {
-
-
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))//.withQueryParam(FROM_TIME, equalTo(TODAY_PLUS_SIX.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)))
-                .willReturn(aResponse().withBody("{\n" +
+        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+                .willReturn(okJson("{\n" +
                         "    \"LogEvents\": [\n" +
                         createLogEventBody(getTodayPlus(1)) + "," +
                         createLogEventBody(getTodayPlus(2)) +
                         "    ]\n" +
                         "}")
                 ));
+    }
 
+    private void given_the_mock_will_respond_to_log_as_expired_token() {
+        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+                .willReturn(aResponse()
+                        .withStatus(401)
+                        .withBody("{\n" +
+                                "    \"Error\": \"API key '5dfb7fa4-d300-44b5-b192-df8d6e8303df' is not valid. Try /authorize or /authorize/integrated\"\n" +
+                                "}"))
+        );
     }
 
     private void given_the_mock_will_respond_to_log_for_windowing() {
 
 
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))//.withQueryParam(FROM_TIME, equalTo(TODAY_PLUS_SIX.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)))
-                .willReturn(aResponse().withBody("{\n" +
+        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+                .willReturn(okJson("{\n" +
                         "    \"LogEvents\": [\n" +
                         createLogEventBody(getTodayPlus(1)) + "," +
                         createLogEventBody(getTodayPlus(2)) + "," +
@@ -236,7 +300,7 @@ public class EventLogSourceTaskTest {
         wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
                 .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(5)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(1)))
-                .willReturn(aResponse().withBody("{\n" +
+                .willReturn(okJson("{\n" +
                         "    \"LogEvents\": [\n" +
                         createLogEventBody(getTodayPlus(5)) + "," +
                         createLogEventBody(getTodayPlus(5)) + "," +
@@ -249,7 +313,7 @@ public class EventLogSourceTaskTest {
         wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
                 .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(5)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(6)))
-                .willReturn(aResponse().withBody("{\n" +
+                .willReturn(okJson("{\n" +
                         "    \"LogEvents\": [\n" +
                         createLogEventBody(getTodayPlus(5)) + "," +
                         createLogEventBody(getTodayPlus(6)) + "," +
@@ -261,7 +325,7 @@ public class EventLogSourceTaskTest {
         wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
                 .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(7)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(1)))
-                .willReturn(aResponse().withBody("{\n" +
+                .willReturn(okJson("{\n" +
                         "    \"LogEvents\": [\n" +
                         createLogEventBody(getTodayPlus(8)) + "," +
                         createLogEventBody(getTodayPlus(9)) +

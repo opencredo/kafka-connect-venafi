@@ -45,6 +45,6 @@ public class TokenClient {
     }
 
     private boolean isTokenInvalid() {
-        return tokenValue == null || !tokenExpiry.isBefore(ZonedDateTime.now().minusSeconds(10L));
+        return tokenValue == null || tokenExpiry.isBefore(ZonedDateTime.now().minusSeconds(10L));
     }
 }

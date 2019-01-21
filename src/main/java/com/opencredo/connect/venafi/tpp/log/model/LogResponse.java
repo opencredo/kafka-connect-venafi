@@ -14,7 +14,4 @@ public class LogResponse {
         return LogEvents;
     }
 
-    public void setLogEvents(List<EventLog> logEvents) {
-        LogEvents = logEvents;
-    }
 }
