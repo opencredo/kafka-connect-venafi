@@ -23,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TppLogSourceConnectorTest {
 
+    public static final int ONE_MAX_TASK = 1;
+    public static final int FIRST_VALUE_IN_LIST = 0;
     private WireMockServer wireMockServer = new WireMockServer(
             new WireMockConfiguration().dynamicPort()
                     .extensions(new ResponseTemplateTransformer(false))
@@ -48,6 +50,7 @@ class TppLogSourceConnectorTest {
 
         when_the_task_is_started(sourceTask, taskProperties);
         List<SourceRecord> records = then_the_task_can_be_polled(sourceTask);
+
         assertEquals(0, records.size());
     }
 
@@ -76,7 +79,7 @@ class TppLogSourceConnectorTest {
     }
 
     private Map<String, String> then_I_can_get_the_task_properties(TppLogSourceConnector connector) {
-        return connector.taskConfigs(1).get(0);
+        return connector.taskConfigs(ONE_MAX_TASK).get(FIRST_VALUE_IN_LIST);
     }
 
     private SourceTask then_I_should_be_able_to_get_a_source_task_from_the_connector(TppLogSourceConnector connector) throws InstantiationException, IllegalAccessException {

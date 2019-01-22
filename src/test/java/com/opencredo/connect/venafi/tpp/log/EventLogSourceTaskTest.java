@@ -276,7 +276,7 @@ public class EventLogSourceTaskTest {
         Map<String, String> config = new HashMap<>();
         config.put(BASE_URL_CONFIG, wireMockServer.baseUrl());
         config.put(POLL_INTERVAL, "0");
-        return TppLogSourceConnector.setupSourcePropertiesWithDefaultsIfMissing(config);
+        return new TppLogSourceConfig(config).returnPropertiesWithDefaultsValuesIfMissing();
     }
 
     private void given_the_mock_will_respond_to_auth() {

@@ -27,15 +27,12 @@ public class TppLogSourceConnector extends SourceConnector {
         try {
             configProperties = setupSourcePropertiesWithDefaultsIfMissing(props);
         } catch (ConfigException e) {
-            throw new ConnectException("Couldn't start JdbcSourceConnector due to configuration error", e);
+            throw new ConnectException("Couldn't start TppLogSourceConnector due to configuration error", e);
         }
     }
 
-    static Map<String, String> setupSourcePropertiesWithDefaultsIfMissing(Map<String, String> props) throws ConfigException {
-        Map<String, ?> values = new TppLogSourceConfig(props).values();
-        HashMap<String, String> map = new HashMap<>(values.size());
-        values.forEach((s, o) -> map.put(s, o.toString()));
-        return map;
+    private Map<String, String> setupSourcePropertiesWithDefaultsIfMissing(Map<String, String> props) throws ConfigException {
+        return new TppLogSourceConfig(props).returnPropertiesWithDefaultsValuesIfMissing();
     }
 
     @Override
