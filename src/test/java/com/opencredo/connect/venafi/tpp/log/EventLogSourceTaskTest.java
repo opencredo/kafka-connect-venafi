@@ -135,7 +135,7 @@ public class EventLogSourceTaskTest {
         TppLogSourceTask task = given_a_task_is_setup();
 
         List<SourceRecord> logs = when_the_task_is_polled(task);
-        then_the_logs_are_of_size(logs, 2);
+        then_the_logs_are_of_size(logs, 0);
     }
 
 

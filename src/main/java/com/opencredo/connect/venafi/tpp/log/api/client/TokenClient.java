@@ -7,6 +7,7 @@ import com.opencredo.connect.venafi.tpp.log.api.TppPlatformAuthorization;
 import com.opencredo.connect.venafi.tpp.log.model.Credentials;
 import com.opencredo.connect.venafi.tpp.log.model.TppToken;
 import feign.Feign;
+import feign.Retryer;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
 import feign.slf4j.Slf4jLogger;
@@ -34,6 +35,7 @@ public class TokenClient {
                     .encoder(new GsonEncoder())
                     .logger(new Slf4jLogger())
                     .decoder(customDecoder())
+                    .retryer(Retryer.NEVER_RETRY)
                     .target(TppPlatformAuthorization.class, baseUrl)
                     .getToken(credentials);
 
