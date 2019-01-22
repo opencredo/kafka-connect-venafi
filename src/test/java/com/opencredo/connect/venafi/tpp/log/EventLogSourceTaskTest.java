@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.opencredo.connect.venafi.tpp.log.TppLogSourceConnector.*;
+import static com.opencredo.connect.venafi.tpp.log.TppLogSourceConfig.*;
 import static com.opencredo.connect.venafi.tpp.log.TppLogSourceTask.*;
 import static com.opencredo.connect.venafi.tpp.log.api.TppLog.FROM_TIME;
 import static com.opencredo.connect.venafi.tpp.log.api.TppLog.OFFSET;
@@ -31,13 +31,15 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class EventLogSourceTaskTest {
 
-    private final ZonedDateTime TODAY = ZonedDateTime.now();
+    public static final String LOG_API_REGEX_PATH = "/[Ll]og/?";
+    public static final String AUTHORIZE_API_REGEX_PATH = "/[Aa]uthorize/?";
+    private static final ZonedDateTime TODAY = ZonedDateTime.now();
     private WireMockServer wireMockServer = new WireMockServer(
             new WireMockConfiguration().dynamicPort()
                     .extensions(new ResponseTemplateTransformer(false))
     );
 
-    ZonedDateTime getTodayPlus(int seconds) {
+    static ZonedDateTime getTodayPlus(int seconds) {
         return TODAY.plusSeconds(seconds);
     }
 
@@ -58,13 +60,35 @@ public class EventLogSourceTaskTest {
     @Test
     public void as_a_client_I_want_a_token() {
 
-
         given_the_mock_will_respond_to_auth();
         TppLogSourceTask task = given_a_task_is_setup();
 
         String token = when_a_token_is_got(task);
         assertNotNull(token);
         assertNotEquals("", token);
+    }
+
+    @Test
+    public void as_a_client_I_want_an_empty_token_if_I_get_an_exception_from_auth() {
+
+        given_the_mock_will_respond_to_auth_bad_request();
+        TppLogSourceTask task = given_a_task_is_setup();
+
+        String token = when_a_token_is_got(task);
+        assertNotNull(token);
+        assertEquals("", token);
+    }
+
+    @Test
+    public void as_a_client_I_want_to_not_make_a_logs_call_if_I_get_an_exception_from_auth() {
+
+        given_the_mock_will_respond_to_auth_bad_request();
+        TppLogSourceTask task = given_a_task_is_setup();
+
+        List<SourceRecord> logs = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(logs, 0);
+        wireMockServer.verify(1, postRequestedFor(urlPathMatching(AUTHORIZE_API_REGEX_PATH)));
+        wireMockServer.verify(0, getRequestedFor(urlPathMatching(LOG_API_REGEX_PATH)));
     }
 
     @Test
@@ -79,7 +103,7 @@ public class EventLogSourceTaskTest {
         String token2 = when_a_token_is_got(task);
         assertTrue(isNotNullOrBlank(token2));
         assertEquals(token, token2);
-        wireMockServer.verify(1, postRequestedFor(urlPathMatching("/[Aa]uthorize/?")));
+        wireMockServer.verify(1, postRequestedFor(urlPathMatching(AUTHORIZE_API_REGEX_PATH)));
     }
 
     @Test
@@ -91,7 +115,7 @@ public class EventLogSourceTaskTest {
         assertTrue(isNotNullOrBlank(invalidToken));
         String invalidToken2 = when_a_token_is_got(task);
         assertTrue(isNotNullOrBlank(invalidToken2));
-        wireMockServer.verify(2, postRequestedFor(urlPathMatching("/[Aa]uthorize/?")));
+        wireMockServer.verify(2, postRequestedFor(urlPathMatching(AUTHORIZE_API_REGEX_PATH)));
         assertNotEquals(invalidToken, invalidToken2);
 
     }
@@ -106,6 +130,22 @@ public class EventLogSourceTaskTest {
 
         TppLogSourceTask task = given_a_task_is_setup_with(mockSourceTaskContext);
 
+
+        List<SourceRecord> sourceRecords1 = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(sourceRecords1, 3);
+
+        List<SourceRecord> sourceRecords2 = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(sourceRecords2, 1);
+    }
+
+    @Test
+    public void as_a_task_I_want_to_handle_an_empty_context() {
+        SourceTaskContext mockSourceTaskContext = given_a_mock_source_context_with(Collections.emptyMap());
+
+        given_the_mock_will_respond_to_auth();
+        given_the_mock_will_respond_to_log_for_empty_offsetsStorage();
+
+        TppLogSourceTask task = given_a_task_is_setup_with(mockSourceTaskContext);
 
         List<SourceRecord> sourceRecords1 = when_the_task_is_polled(task);
         then_the_logs_are_of_size(sourceRecords1, 3);
@@ -186,11 +226,16 @@ public class EventLogSourceTaskTest {
     }
 
     private SourceTaskContext given_a_mock_source_context_with(ZonedDateTime lastReadDate, Integer lastApiOffset) {
-        SourceTaskContext mockSourceTaskContext = Mockito.mock(SourceTaskContext.class);
-        OffsetStorageReader mockOffsetStorageReader = Mockito.mock(OffsetStorageReader.class);
         Map<String, Object> config = new HashMap<>(2);
         config.put(LAST_READ, lastReadDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         config.put(LAST_API_OFFSET, lastApiOffset);
+
+        return given_a_mock_source_context_with(config);
+    }
+
+    private SourceTaskContext given_a_mock_source_context_with(Map<String,Object> config) {
+        SourceTaskContext mockSourceTaskContext = Mockito.mock(SourceTaskContext.class);
+        OffsetStorageReader mockOffsetStorageReader = Mockito.mock(OffsetStorageReader.class);
         Mockito.when(mockOffsetStorageReader.offset(Mockito.anyMap())).thenReturn(config);
         Mockito.when(mockSourceTaskContext.offsetStorageReader()).thenReturn(mockOffsetStorageReader);
         return mockSourceTaskContext;
@@ -230,17 +275,15 @@ public class EventLogSourceTaskTest {
     private Map<String, String> getTaskConfig() {
         Map<String, String> config = new HashMap<>();
         config.put(BASE_URL_CONFIG, wireMockServer.baseUrl());
-        config.put(TOPIC_CONFIG, "temp");
-        config.put(BATCH_SIZE, "1000");
         config.put(POLL_INTERVAL, "0");
-        return config;
+        return TppLogSourceConnector.setupSourcePropertiesWithDefaultsIfMissing(config);
     }
 
     private void given_the_mock_will_respond_to_auth() {
-        wireMockServer.stubFor(post(urlPathMatching("/[Aa]uthorize/?"))
+        wireMockServer.stubFor(post(urlPathMatching(AUTHORIZE_API_REGEX_PATH))
                 .withRequestBody(equalToJson("{\n" +
-                        "\t\"Username\":\"rufus\",\n" +
-                        "\t\"Password\":\"qxaag{q,h=g$9~!e\"\n" +
+                        "\t\"Username\":\"placeholder_username\",\n" +
+                        "\t\"Password\":\"placeholder_password\"\n" +
                         "}")).withHeader("Content-Type", containing("application/json"))
                 .willReturn(okJson("{\n" +
                         "    \"APIKey\": \"{{randomValue type='UUID'}}\",\n" +
@@ -250,10 +293,10 @@ public class EventLogSourceTaskTest {
     }
 
     private void given_the_mock_will_respond_to_auth_with_expired_token() {
-        wireMockServer.stubFor(post(urlPathMatching("/[Aa]uthorize/?"))
+        wireMockServer.stubFor(post(urlPathMatching(AUTHORIZE_API_REGEX_PATH))
                 .withRequestBody(equalToJson("{\n" +
-                        "\t\"Username\":\"rufus\",\n" +
-                        "\t\"Password\":\"qxaag{q,h=g$9~!e\"\n" +
+                        "\t\"Username\":\"placeholder_username\",\n" +
+                        "\t\"Password\":\"placeholder_password\"\n" +
                         "}")).withHeader("Content-Type", containing("application/json"))
                 .willReturn(okJson("{\n" +
                         "    \"APIKey\": \"{{randomValue type='UUID'}}\",\n" +
@@ -262,8 +305,18 @@ public class EventLogSourceTaskTest {
                 ));
     }
 
+    private void given_the_mock_will_respond_to_auth_bad_request() {
+        wireMockServer.stubFor(post(urlPathMatching(AUTHORIZE_API_REGEX_PATH))
+                .withRequestBody(equalToJson("{\n" +
+                        "\t\"Username\":\"placeholder_username\",\n" +
+                        "\t\"Password\":\"placeholder_password\"\n" +
+                        "}")).withHeader("Content-Type", containing("application/json"))
+                .willReturn(badRequest()
+                ));
+    }
+
     private void given_the_mock_will_respond_to_log() {
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+        wireMockServer.stubFor(get(urlPathMatching(LOG_API_REGEX_PATH))
                 .willReturn(okJson("{\n" +
                         "    \"LogEvents\": [\n" +
                         createLogEventBody(getTodayPlus(1)) + "," +
@@ -274,7 +327,7 @@ public class EventLogSourceTaskTest {
     }
 
     private void given_the_mock_will_respond_to_log_as_expired_token() {
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+        wireMockServer.stubFor(get(urlPathMatching(LOG_API_REGEX_PATH))
                 .willReturn(aResponse()
                         .withStatus(401)
                         .withBody("{\n" +
@@ -286,7 +339,7 @@ public class EventLogSourceTaskTest {
     private void given_the_mock_will_respond_to_log_for_windowing() {
 
 
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+        wireMockServer.stubFor(get(urlPathMatching(LOG_API_REGEX_PATH))
                 .willReturn(okJson("{\n" +
                         "    \"LogEvents\": [\n" +
                         createLogEventBody(getTodayPlus(1)) + "," +
@@ -360,7 +413,31 @@ public class EventLogSourceTaskTest {
                 ));
     }
 
-    private String createLogEventBody(ZonedDateTime dateTime) {
+    private void given_the_mock_will_respond_to_log_for_empty_offsetsStorage() {
+
+        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+                .withQueryParam(FROM_TIME, equalTo(DEFAULT_FROM_TIME))
+                .withQueryParam(OFFSET, equalTo(String.valueOf(0)))
+                .willReturn(aResponse().withBody("{\n" +
+                        "    \"LogEvents\": [\n" +
+                        createLogEventBody(getTodayPlus(8)) + "," +
+                        createLogEventBody(getTodayPlus(8)) + "," +
+                        createLogEventBody(getTodayPlus(100)) +
+                        "    ]\n" +
+                        "}")
+                ));
+        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+                .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(100)))
+                .withQueryParam(OFFSET, equalTo(String.valueOf(1)))
+                .willReturn(aResponse().withBody("{\n" +
+                        "    \"LogEvents\": [\n" +
+                        createLogEventBody(getTodayPlus(100)) +
+                        "    ]\n" +
+                        "}")
+                ));
+    }
+
+    static String createLogEventBody(ZonedDateTime dateTime) {
         return "        {\n" +
                 "            \"ClientTimestamp\": \"" + dateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "\",\n" +
                 "            \"Component\": \"\\\\VED\\\\Policy\\\\certificates\\\\_Discovered\\\\TrustNet\\\\defaultwebsite.lab.venafi.com - 83\",\n" +
