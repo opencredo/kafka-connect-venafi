@@ -43,7 +43,7 @@ public class EventLog {
             .field(TEXT_2, Schema.OPTIONAL_STRING_SCHEMA)
             .field(VALUE_1, Schema.OPTIONAL_INT32_SCHEMA)
             .field(VALUE_2, Schema.OPTIONAL_INT32_SCHEMA)
-            .field(DATA,Schema.OPTIONAL_STRING_SCHEMA)
+            .field(DATA, Schema.OPTIONAL_STRING_SCHEMA)
             .build();
 
 
@@ -73,128 +73,64 @@ public class EventLog {
         return EventId;
     }
 
-    public void setEventId(String eventId) {
-        EventId = eventId;
-    }
-
     public ZonedDateTime getClientTimestamp() {
         return ClientTimestamp;
-    }
-
-    public void setClientTimestamp(ZonedDateTime clientTimestamp) {
-        this.ClientTimestamp = clientTimestamp;
     }
 
     public String getComponent() {
         return Component;
     }
 
-    public void setComponent(String component) {
-        Component = component;
-    }
-
     public Integer getComponentId() {
         return ComponentId;
-    }
-
-    public void setComponentId(Integer componentId) {
-        ComponentId = componentId;
     }
 
     public String getComponentSubsystem() {
         return ComponentSubsystem;
     }
 
-    public void setComponentSubsystem(String componentSubsystem) {
-        ComponentSubsystem = componentSubsystem;
-    }
-
     public Integer getGrouping() {
         return Grouping;
-    }
-
-    public void setGrouping(Integer grouping) {
-        Grouping = grouping;
     }
 
     public Long getId() {
         return Id;
     }
 
-    public void setId(Long id) {
-        Id = id;
-    }
-
     public String getName() {
         return Name;
-    }
-
-    public void setName(String name) {
-        Name = name;
     }
 
     public ZonedDateTime getServerTimestamp() {
         return ServerTimestamp;
     }
 
-    public void setServerTimestamp(ZonedDateTime serverTimestamp) {
-        ServerTimestamp = serverTimestamp;
-    }
-
     public String getSeverity() {
         return Severity;
-    }
-
-    public void setSeverity(String severity) {
-        Severity = severity;
     }
 
     public String getSourceIP() {
         return SourceIP;
     }
 
-    public void setSourceIP(String sourceIP) {
-        SourceIP = sourceIP;
-    }
-
     public String getText1() {
         return Text1;
-    }
-
-    public void setText1(String text1) {
-        Text1 = text1;
     }
 
     public String getText2() {
         return Text2;
     }
 
-    public void setText2(String text2) {
-        Text2 = text2;
-    }
-
     public Integer getValue1() {
         return Value1;
-    }
-
-    public void setValue1(Integer value1) {
-        Value1 = value1;
     }
 
     public Integer getValue2() {
         return Value2;
     }
 
-    public void setValue2(Integer value2) {
-        Value2 = value2;
-    }
-
     public String getData() {
         return Data;
-    }
-
-    public void setData(String data) {
-        Data = data;
     }
 
     public Struct toStruct() {
@@ -213,11 +149,9 @@ public class EventLog {
         if (getEventId() != null) {
             tppLog.put(EVENT_ID, getEventId());
         }
-
         if (getText1() != null) {
             tppLog.put(TEXT_1, getText1());
         }
-
         if (getText2() != null) {
             tppLog.put(TEXT_2, getText2());
         }
@@ -227,14 +161,13 @@ public class EventLog {
         if (getValue2() != null) {
             tppLog.put(VALUE_2, getValue2());
         }
-
         if (getData() != null) {
             tppLog.put(DATA, getData());
         }
-        if(getComponentId() != null) {
+        if (getComponentId() != null) {
             tppLog.put(COMPONENT_ID, getComponentId());
         }
-        if(getComponentSubsystem() != null) {
+        if (getComponentSubsystem() != null) {
             tppLog.put(COMPONENT_SUBSYSTEM, getComponentSubsystem());
         }
 

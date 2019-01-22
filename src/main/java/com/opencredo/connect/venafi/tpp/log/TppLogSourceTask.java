@@ -9,25 +9,27 @@ import org.apache.kafka.connect.source.SourceTask;
 import org.slf4j.LoggerFactory;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TppLogSourceTask extends SourceTask {
 
     public static final String URL = "url";
     public static final String LAST_READ = "last_read";
-    public static final String DEFAULT_FROM_TIME = "2018-05-04T00:00:00.0000000Z";
+    public static final String LAST_API_OFFSET = "last_api_offset";
+    public static final String DEFAULT_FROM_TIME = "1984-05-04T00:00:00.0000000Z";
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(TppLogSourceConnector.class);
-    private String staticOffset;
+    private String fromDate = DEFAULT_FROM_TIME;
     private String baseUrl;
     private String topic;
     private String batchSize;
+    private int apiOffset;
     private Long interval;
     private Long last_execution = 0L;
     private TokenClient tokenClient = new TokenClient();
 
+    public static boolean isNotNullOrBlank(String str) {
+        return str != null && !str.trim().isEmpty();
+    }
 
     @Override
     public String version() {
@@ -41,14 +43,24 @@ public class TppLogSourceTask extends SourceTask {
         batchSize = props.get(TppLogSourceConnector.BATCH_SIZE);
         interval = Long.parseLong(props.get(TppLogSourceConnector.POLL_INTERVAL));
 
-        log.info("Trying to get offset.");
-        Map<String, Object> offset = null;
+        log.debug("Trying to get persistedMap.");
+        Map<String, Object> persistedMap = null;
         if (context != null && context.offsetStorageReader() != null) {
-            offset = context.offsetStorageReader().offset(Collections.singletonMap(URL, baseUrl));
+            persistedMap = context.offsetStorageReader().offset(Collections.singletonMap(URL, baseUrl));
         }
-        log.info("The offset is {}", offset);
-        if (offset != null) {
-            staticOffset = (String) offset.get(LAST_READ);
+        log.info("The persistedMap is {}", persistedMap);
+        if (persistedMap != null) {
+            String lastRead = (String) persistedMap.get(LAST_READ);
+            if (isNotNullOrBlank(lastRead)) {
+                fromDate = lastRead;
+            }
+
+            Integer lastApiOffset = (Integer) persistedMap.get(LAST_API_OFFSET);
+            if (lastApiOffset != null) {
+                apiOffset = lastApiOffset;
+            }
+
+
         }
     }
 
@@ -62,31 +74,60 @@ public class TppLogSourceTask extends SourceTask {
         }
     }
 
+
     private List<SourceRecord> getTppLogsAsSourceRecords() {
         String token = getToken();
-        String fromDate = DEFAULT_FROM_TIME;
+        int loopOffset = 0;
 
-        if (staticOffset != null && !staticOffset.isEmpty()) {
-            fromDate = staticOffset;
-        }
-
-        List<EventLog> jsonLogs = getTppLogs(token, fromDate);
+        List<EventLog> jsonLogs = getTppLogs(token, fromDate, apiOffset);
         ArrayList<SourceRecord> records = new ArrayList<>();
         for (EventLog eventLog : jsonLogs) {
-            Map<String, Object> sourcePartition = Collections.singletonMap(URL, baseUrl);
-            staticOffset = eventLog.getClientTimestamp().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            Map<String, Object> sourceOffset = Collections.singletonMap(
-                    LAST_READ,
-                    staticOffset
-            );
-            log.info(" The staticOffset is {}.", staticOffset);
-            records.add(new SourceRecord(sourcePartition, sourceOffset, topic, EventLog.TppLogSchema(), eventLog.toStruct()));
+
+            String newFromDate = eventLog.getClientTimestamp().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
+            loopOffset = calculateLoopOffset(loopOffset, newFromDate, fromDate);
+            fromDate = newFromDate;
+
+            log.debug(" The fromDate is now {}.", fromDate);
+            records.add(buildSourceRecord(eventLog, fromDate, apiOffset));
         }
+        apiOffset = calculateApiOffset(loopOffset, jsonLogs);
+
         return records;
     }
 
-    List<EventLog> getTppLogs(String token, String date) {
-        LogResponse logResponse = LogsClient.getLogs(token, date, baseUrl, batchSize);
+    private SourceRecord buildSourceRecord(EventLog eventLog, String lastRead, Integer apiOffset) {
+        Map<String, Object> sourceOffset = buildSourceOffset(lastRead, apiOffset);
+        Map<String, Object> sourcePartition = buildSourcePartition();
+        return new SourceRecord(sourcePartition, sourceOffset, topic, EventLog.TppLogSchema(), eventLog.toStruct());
+    }
+
+    private int calculateLoopOffset(int currentLoopOffset, String newFromDate, String oldFromDate) {
+        if (newFromDate.equals(oldFromDate)) {
+            return ++currentLoopOffset;
+        }
+        return 1;
+    }
+
+    private int calculateApiOffset(int currentLoopOffset, List<EventLog> jsonLogs) {
+        if (jsonLogs.size() == currentLoopOffset) {
+            return apiOffset + currentLoopOffset;
+        }
+        return currentLoopOffset;
+    }
+
+    private Map<String, Object> buildSourcePartition() {
+        return Collections.singletonMap(URL, baseUrl);
+    }
+
+    private Map<String, Object> buildSourceOffset(String lastRead, Integer apiOffset) {
+        Map<String, Object> sourceOffset = new HashMap<>();
+        sourceOffset.put(LAST_READ, lastRead);
+        sourceOffset.put(LAST_API_OFFSET, apiOffset);
+        return sourceOffset;
+    }
+
+    List<EventLog> getTppLogs(String token, String date, int offset) {
+        LogResponse logResponse = LogsClient.getLogs(token, date, baseUrl, batchSize, offset);
 
         return logResponse.getLogEvents();
     }
