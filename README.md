@@ -1,7 +1,7 @@
 # kafka-connect-venafi-tpp
 [![Build Status](https://travis-ci.com/opencredo/kafka-connect-venafi-tpp.svg?token=9Xb3AhGzVsnLVT8gQNzo&branch=master)](https://travis-ci.com/opencredo/kafka-connect-venafi-tpp)
 
-kafka-connect-venafi-tpp is a [Kafka connector](http://kafka.apache.org/documentation.html#connect) for the Venafi Trust Protection Platform Security Events.
+kafka-connect-venafi-tpp is a [Kafka connector](http://kafka.apache.org/documentation.html#connect) for Venafi Trust Protection Platform security events.
 
 # Development
 To manually install the connector:
