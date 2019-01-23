@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.opencredo.connect.venafi.tpp.log.TppLogSourceConfig.*;
+
 public class TppLogSourceTask extends SourceTask {
 
     public static final String URL = "url";
@@ -25,23 +27,20 @@ public class TppLogSourceTask extends SourceTask {
     private int apiOffset;
     private Long interval;
     private Long last_execution = 0L;
-    private TokenClient tokenClient = new TokenClient();
+    private TokenClient tokenClient;
 
-    public static boolean isNotNullOrBlank(String str) {
+    static boolean isNotNullOrBlank(String str) {
         return str != null && !str.trim().isEmpty();
     }
 
     @Override
     public String version() {
-        return null;
+        return "1.0";
     }
 
     @Override
     public void start(Map<String, String> props) {
-        baseUrl = props.get(TppLogSourceConnector.BASE_URL_CONFIG);
-        topic = props.get(TppLogSourceConnector.TOPIC_CONFIG);
-        batchSize = props.get(TppLogSourceConnector.BATCH_SIZE);
-        interval = Long.parseLong(props.get(TppLogSourceConnector.POLL_INTERVAL));
+        setupTaskConfig(props);
 
         log.debug("Trying to get persistedMap.");
         Map<String, Object> persistedMap = null;
@@ -64,19 +63,33 @@ public class TppLogSourceTask extends SourceTask {
         }
     }
 
+    private void setupTaskConfig(Map<String, String> props) {
+        baseUrl = props.get(BASE_URL_CONFIG);
+        topic = props.get(TOPIC_CONFIG);
+        batchSize = props.get(BATCH_SIZE);
+        interval = Long.parseLong(props.get(POLL_INTERVAL));
+
+        String username = props.get(USERNAME_CONFIG);
+        String password = props.get(PASSWORD_CONFIG);
+        tokenClient = new TokenClient(username, password);
+    }
+
     @Override
     public List<SourceRecord> poll() {
         if (System.currentTimeMillis() > (last_execution + interval)) {
             last_execution = System.currentTimeMillis();
-            return getTppLogsAsSourceRecords();
-        } else {
-            return Collections.emptyList();
+            String token = getToken();
+            if (isNotNullOrBlank(token)) {
+                return getTppLogsAsSourceRecords(token);
+            }
         }
+        return Collections.emptyList();
+
     }
 
 
-    private List<SourceRecord> getTppLogsAsSourceRecords() {
-        String token = getToken();
+    private List<SourceRecord> getTppLogsAsSourceRecords(String token) {
+
         int loopOffset = 0;
 
         List<EventLog> jsonLogs = getTppLogs(token, fromDate, apiOffset);
