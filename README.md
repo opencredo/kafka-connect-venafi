@@ -8,7 +8,8 @@ To manually install the connector:
 1. Build the Jar with `mvn package`
 2. Find the Jar in your target folder called venafi-tpp-log-connector-<version you're building>.jar
 3. Create a connect property file 
-```name=venafi
+```
+name=venafi
 connector.class=com.opencredo.connect.venafi.tpp.log.TppLogSourceConnector
 tasks.max=1
 type.name=kafka-connect
