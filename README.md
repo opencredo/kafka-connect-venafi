@@ -21,9 +21,9 @@ venafi.poll.interval=1000
 ```
 This is filled with the default values as provided by the config definition [class](???)
 Whilst all `venafi` fields are currently optional and will default to above please change `venafi.base.url`, `venafi.username` and `venafi.password`.   
-4. Create a directory to place this files e.g. `<path-to-confluent>/share/kafka/plugins`.
-5. Add this to the plugin path in your Connect properties file.
-6. Then call `bin/confluent load venafi -d venafi.properties`
-If you need to unload/reload it `bin/confluent unload venafi` 
+4. Create a directory to place this files e.g. `<path-to-confluent>/share/kafka/plugins`.  
+5. Add this to the plugin path in your Connect properties file.   
+6. Then call: `bin/confluent load venafi -d venafi.properties`  
+If you need to unload/reload it use: `bin/confluent unload venafi`  
 
 For more information please look at the [Confluent instructions on manually installing connectors](https://docs.confluent.io/current/connect/managing/install.html#connect-install-connectors).
