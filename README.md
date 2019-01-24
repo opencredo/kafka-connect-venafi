@@ -20,7 +20,7 @@ venafi.password=placeholder_password
 venafi.batch.size=100 
 venafi.poll.interval=1000
 ```
-This is filled with the default values as provided by the config definition [class](../src/main/java/com/opencredo/connect/venafi/tpp/log/TppLogSourceConfig.java).  
+This is filled with the default values as provided by the [config definition class](./src/main/java/com/opencredo/connect/venafi/tpp/log/TppLogSourceConfig.java).  
 Whilst all `venafi` fields are currently optional and will default to above please change `venafi.base.url`, `venafi.username` and `venafi.password`.   
 4. Create a directory to place this files e.g. `<path-to-confluent>/share/kafka/plugins`.  
 5. Add this to the plugin path in your Connect properties file.   
