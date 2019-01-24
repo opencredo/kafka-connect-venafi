@@ -29,16 +29,16 @@ public class EventLog {
     public static final Schema SCHEMA = SchemaBuilder.struct()
             .name(EventLog.class.getSimpleName())
             .field(CLIENT_TIMESTAMP, Timestamp.SCHEMA)
-            .field(COMPONENT, Schema.STRING_SCHEMA)
-            .field(COMPONENT_ID, Schema.OPTIONAL_INT32_SCHEMA)
-            .field(COMPONENT_SUBSYSTEM, Schema.OPTIONAL_STRING_SCHEMA)
-            .field(EVENT_ID, Schema.OPTIONAL_STRING_SCHEMA)
             .field(GROUPING, Schema.INT32_SCHEMA)
             .field(ID, Schema.INT64_SCHEMA)
             .field(NAME, Schema.STRING_SCHEMA)
             .field(SERVER_TIMESTAMP, Timestamp.SCHEMA)
             .field(SEVERITY, Schema.STRING_SCHEMA)
             .field(SOURCE_IP, Schema.STRING_SCHEMA)
+            .field(COMPONENT, Schema.OPTIONAL_STRING_SCHEMA)
+            .field(COMPONENT_ID, Schema.OPTIONAL_INT32_SCHEMA)
+            .field(COMPONENT_SUBSYSTEM, Schema.OPTIONAL_STRING_SCHEMA)
+            .field(EVENT_ID, Schema.OPTIONAL_STRING_SCHEMA)
             .field(TEXT_1, Schema.OPTIONAL_STRING_SCHEMA)
             .field(TEXT_2, Schema.OPTIONAL_STRING_SCHEMA)
             .field(VALUE_1, Schema.OPTIONAL_INT32_SCHEMA)
@@ -137,8 +137,6 @@ public class EventLog {
 
         Struct tppLog = new Struct(TppLogSchema())
                 .put(CLIENT_TIMESTAMP, Date.from(getClientTimestamp().toInstant()))
-                .put(COMPONENT, getComponent())
-
                 .put(GROUPING, getGrouping())
                 .put(ID, getId())
                 .put(NAME, getName())
@@ -146,6 +144,9 @@ public class EventLog {
                 .put(SEVERITY, getSeverity())
                 .put(SOURCE_IP, getSourceIP());
 
+        if (getComponent() != null) {
+            tppLog.put(COMPONENT, getComponent());
+        }
         if (getEventId() != null) {
             tppLog.put(EVENT_ID, getEventId());
         }

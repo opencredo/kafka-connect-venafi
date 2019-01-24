@@ -43,6 +43,26 @@ public class EventLogSourceTaskTest {
         return TODAY.plusSeconds(seconds);
     }
 
+    static String createLogEventBody(ZonedDateTime dateTime) {
+        return "        {\n" +
+                "            \"ClientTimestamp\": \"" + dateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "\",\n" +
+                "            \"Component\": \"\\\\VED\\\\Policy\\\\certificates\\\\_Discovered\\\\TrustNet\\\\defaultwebsite.lab.venafi.com - 83\",\n" +
+                "            \"ComponentId\": 123185,\n" +
+                "            \"ComponentSubsystem\": \"Config\",\n" +
+                "            \"Data\": null,\n" +
+                "            \"Grouping\": 0,\n" +
+                "            \"Id\": 1835016,\n" +
+                "            \"Name\": \"Certificate Revocation - CRL Failure\",\n" +
+                "            \"ServerTimestamp\": \"" + dateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "\",\n" +
+                "            \"Severity\": \"Info\",\n" +
+                "            \"SourceIP\": \"[::1]\",\n" +
+                "            \"Text1\": \"CN=traininglab-Root-CA, DC=traininglab, DC=local\",\n" +
+                "            \"Text2\": \"ldap:///CN=traininglab-Root-CA(1),CN=server1,CN=CDP,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=traininglab,DC=local?certificateRevocationList?base?objectClass=cRLDistributionPoint\",\n" +
+                "            \"Value1\": 0,\n" +
+                "            \"Value2\": 0\n" +
+                "        }\n";
+    }
+
     String getStringOfTodayPlus(int seconds) {
         return getTodayPlus(seconds).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
@@ -55,6 +75,12 @@ public class EventLogSourceTaskTest {
     @AfterEach
     private void shutdown() {
         wireMockServer.shutdown();
+    }
+
+    @Test
+    public void as_a_task_I_should_return_a_version() {
+        TppLogSourceTask task = given_a_task_is_setup();
+        assertEquals("1.0.0", task.version());
     }
 
     @Test
@@ -120,10 +146,9 @@ public class EventLogSourceTaskTest {
 
     }
 
-
     @Test
     public void as_a_task_I_want_a_valid_context() {
-        SourceTaskContext mockSourceTaskContext = given_a_mock_source_context_with(getTodayPlus(2), 1);
+        SourceTaskContext mockSourceTaskContext = given_a_mock_source_context_with(getTodayPlus(2), 1L);
 
         given_the_mock_will_respond_to_auth();
         given_the_mock_will_respond_to_log_for_offsetsStorage();
@@ -170,14 +195,12 @@ public class EventLogSourceTaskTest {
     public void as_a_client_I_want_some_logs_and_handle_token_expiry() {
 
         given_the_mock_will_respond_to_auth();
-//        given_the_mock_will_respond_to_log();
         given_the_mock_will_respond_to_log_as_expired_token();
         TppLogSourceTask task = given_a_task_is_setup();
 
         List<SourceRecord> logs = when_the_task_is_polled(task);
         then_the_logs_are_of_size(logs, 0);
     }
-
 
     @Test
     public void as_a_client_I_want_to_paginate_logs() {
@@ -220,12 +243,11 @@ public class EventLogSourceTaskTest {
         System.out.println(record);
     }
 
-
     private List<SourceRecord> when_the_task_is_polled(TppLogSourceTask task) {
         return task.poll();
     }
 
-    private SourceTaskContext given_a_mock_source_context_with(ZonedDateTime lastReadDate, Integer lastApiOffset) {
+    private SourceTaskContext given_a_mock_source_context_with(ZonedDateTime lastReadDate, Long lastApiOffset) {
         Map<String, Object> config = new HashMap<>(2);
         config.put(LAST_READ, lastReadDate.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
         config.put(LAST_API_OFFSET, lastApiOffset);
@@ -233,7 +255,7 @@ public class EventLogSourceTaskTest {
         return given_a_mock_source_context_with(config);
     }
 
-    private SourceTaskContext given_a_mock_source_context_with(Map<String,Object> config) {
+    private SourceTaskContext given_a_mock_source_context_with(Map<String, Object> config) {
         SourceTaskContext mockSourceTaskContext = Mockito.mock(SourceTaskContext.class);
         OffsetStorageReader mockOffsetStorageReader = Mockito.mock(OffsetStorageReader.class);
         Mockito.when(mockOffsetStorageReader.offset(Mockito.anyMap())).thenReturn(config);
@@ -276,6 +298,8 @@ public class EventLogSourceTaskTest {
         Map<String, String> config = new HashMap<>();
         config.put(BASE_URL_CONFIG, wireMockServer.baseUrl());
         config.put(POLL_INTERVAL, "0");
+        config.put(USERNAME_CONFIG, "placeholder_username");
+        config.put(PASSWORD_CONFIG, "placeholder_password");
         return new TppLogSourceConfig(config).returnPropertiesWithDefaultsValuesIfMissing();
     }
 
@@ -435,26 +459,6 @@ public class EventLogSourceTaskTest {
                         "    ]\n" +
                         "}")
                 ));
-    }
-
-    static String createLogEventBody(ZonedDateTime dateTime) {
-        return "        {\n" +
-                "            \"ClientTimestamp\": \"" + dateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "\",\n" +
-                "            \"Component\": \"\\\\VED\\\\Policy\\\\certificates\\\\_Discovered\\\\TrustNet\\\\defaultwebsite.lab.venafi.com - 83\",\n" +
-                "            \"ComponentId\": 123185,\n" +
-                "            \"ComponentSubsystem\": \"Config\",\n" +
-                "            \"Data\": null,\n" +
-                "            \"Grouping\": 0,\n" +
-                "            \"Id\": 1835016,\n" +
-                "            \"Name\": \"Certificate Revocation - CRL Failure\",\n" +
-                "            \"ServerTimestamp\": \"" + dateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "\",\n" +
-                "            \"Severity\": \"Info\",\n" +
-                "            \"SourceIP\": \"[::1]\",\n" +
-                "            \"Text1\": \"CN=traininglab-Root-CA, DC=traininglab, DC=local\",\n" +
-                "            \"Text2\": \"ldap:///CN=traininglab-Root-CA(1),CN=server1,CN=CDP,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=traininglab,DC=local?certificateRevocationList?base?objectClass=cRLDistributionPoint\",\n" +
-                "            \"Value1\": 0,\n" +
-                "            \"Value2\": 0\n" +
-                "        }\n";
     }
 
 }

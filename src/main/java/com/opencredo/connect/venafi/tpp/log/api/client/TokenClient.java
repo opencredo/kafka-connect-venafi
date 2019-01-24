@@ -18,10 +18,10 @@ import java.time.ZonedDateTime;
 
 public class TokenClient {
 
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(TokenClient.class);
     private String tokenValue;
     private ZonedDateTime tokenExpiry = ZonedDateTime.now();
     private Credentials credentials;
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(TokenClient.class);
 
     public TokenClient(String username, String password) {
         credentials = new Credentials(username, password);

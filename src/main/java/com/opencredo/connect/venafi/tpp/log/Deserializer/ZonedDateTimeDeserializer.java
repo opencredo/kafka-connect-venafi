@@ -4,6 +4,7 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,15 +31,8 @@ public class ZonedDateTimeDeserializer implements JsonDeserializer<ZonedDateTime
         try {
             return ZonedDateTime.parse(dateTimeString);
         } catch (DateTimeParseException e) {
-            //swallow exception for now
             log.debug("Failed to parse to ZonedDateTime format", e);
-        }
-
-        try {
-            return ZonedDateTime.parse(dateTimeString + "Z");
-        } catch (DateTimeParseException up) {
-            log.debug("Failed to parse to ZonedDateTime format with added Z.", up);
-            throw up;
+            throw new ConnectException(e);
         }
     }
 

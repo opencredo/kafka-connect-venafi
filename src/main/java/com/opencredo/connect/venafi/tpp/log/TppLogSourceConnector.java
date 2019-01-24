@@ -43,7 +43,7 @@ public class TppLogSourceConnector extends SourceConnector {
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
         if (maxTasks != 1) {
-            throw new IllegalArgumentException("max Tasks should be set to 1.");
+            log.info("Ignoring maxTasks as there can only be one.");
         }
         List<Map<String, String>> configs = new ArrayList<>(maxTasks);
         Map<String, String> taskConfig = new HashMap<>();
@@ -64,6 +64,6 @@ public class TppLogSourceConnector extends SourceConnector {
 
     @Override
     public String version() {
-        return "1.0";
+        return VersionUtil.getVersion();
     }
 }
