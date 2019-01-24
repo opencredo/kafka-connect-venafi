@@ -30,7 +30,7 @@ For more information please look at the [Confluent instructions on manually inst
 
 ---
 If you need to unload/reload it use: `bin/confluent unload venafi`  
-If you intend to change the JAR please stop, change the JAR then start the cluster.  
+If you intend to change the JAR please stop, change the JAR, then start the cluster.  
 
 # Useful commands while developing
 ```
