@@ -26,14 +26,14 @@ class TppLogSourceConfigTest {
     @Test
     void as_a_config_I_should_throw_a_config_exception_if_nothing_is_set() {
         Map<String, Object> props = Collections.emptyMap();
-        Executable executingConfig = given_an_config_with(props);
+        Executable executingConfig = given_a_config_with(props);
         then_I_expect_a_config_exception_when_I_run_this(executingConfig);
     }
 
     @Test
-    void as_a_config_I_should_throw_a_config_exception_if_minimum_properties_are_set() {
+    void as_a_config_I_should_not_throw_a_config_exception_if_minimum_properties_are_set() {
         Map<String, Object> props = given_a_minimum_list_of_properties();
-        Executable executingConfig = given_an_config_with(props);
+        Executable executingConfig = given_a_config_with(props);
         then_I_expect_no_config_exception_when_run_this(executingConfig);
     }
 
@@ -49,7 +49,7 @@ class TppLogSourceConfigTest {
     void as_a_config_I_should_throw_a_config_exception_if_base_URL_is_not_set() {
         Map<String, Object> props = given_a_minimum_list_of_properties();
         given_this_is_removed_from(BASE_URL_CONFIG, props);
-        Executable executingConfig = given_an_config_with(props);
+        Executable executingConfig = given_a_config_with(props);
         ConfigException exception = then_I_expect_a_config_exception_when_I_run_this(executingConfig);
         assertEquals(noDefaultValueFor(BASE_URL_CONFIG), exception.getMessage());
     }
@@ -58,7 +58,7 @@ class TppLogSourceConfigTest {
     void as_a_config_I_should_throw_a_config_exception_if_password_is_not_set() {
         Map<String, Object> props = given_a_minimum_list_of_properties();
         given_this_is_removed_from(PASSWORD_CONFIG, props);
-        Executable executingConfig = given_an_config_with(props);
+        Executable executingConfig = given_a_config_with(props);
         ConfigException exception = then_I_expect_a_config_exception_when_I_run_this(executingConfig);
         assertEquals(noDefaultValueFor(PASSWORD_CONFIG), exception.getMessage());
     }
@@ -67,7 +67,7 @@ class TppLogSourceConfigTest {
     void as_a_config_I_should_throw_a_config_exception_if_username_is_not_set() {
         Map<String, Object> props = given_a_minimum_list_of_properties();
         given_this_is_removed_from(USERNAME_CONFIG, props);
-        Executable executingConfig = given_an_config_with(props);
+        Executable executingConfig = given_a_config_with(props);
         ConfigException exception = then_I_expect_a_config_exception_when_I_run_this(executingConfig);
         assertEquals(noDefaultValueFor(USERNAME_CONFIG), exception.getMessage());
     }
@@ -77,7 +77,7 @@ class TppLogSourceConfigTest {
     void as_a_config_I_should_throw_a_config_exception_if_base_URL_is_invalid() {
         Map<String, Object> props = given_a_minimum_list_of_properties();
         given_this_is_overriden_with(BASE_URL_CONFIG, EMPTY_STRING, props);
-        Executable executingConfig = given_an_config_with(props);
+        Executable executingConfig = given_a_config_with(props);
         ConfigException exception = then_I_expect_a_config_exception_when_I_run_this(executingConfig);
         assertEquals(invalidConfigForNonEmptyString(BASE_URL_CONFIG, EMPTY_STRING), exception.getMessage());
     }
@@ -86,7 +86,7 @@ class TppLogSourceConfigTest {
     void as_a_config_I_should_throw_a_config_exception_if_topic_is_invalid() {
         Map<String, Object> props = given_a_minimum_list_of_properties();
         given_this_is_overriden_with(TOPIC_CONFIG, EMPTY_STRING, props);
-        Executable executingConfig = given_an_config_with(props);
+        Executable executingConfig = given_a_config_with(props);
         ConfigException exception = then_I_expect_a_config_exception_when_I_run_this(executingConfig);
         assertEquals(invalidConfigForNonEmptyString(TOPIC_CONFIG, EMPTY_STRING), exception.getMessage());
     }
@@ -95,7 +95,7 @@ class TppLogSourceConfigTest {
     void as_a_config_I_should_throw_a_config_exception_if_batch_size_is_too_small() {
         Map<String, Object> props = given_a_minimum_list_of_properties();
         given_this_is_overriden_with(BATCH_SIZE, TOO_SMALL_BATCH_SIZE, props);
-        Executable executingConfig = given_an_config_with(props);
+        Executable executingConfig = given_a_config_with(props);
         ConfigException exception = then_I_expect_a_config_exception_when_I_run_this(executingConfig);
         assertEquals(invalidConfigForTooSmallValue(BATCH_SIZE, TOO_SMALL_BATCH_SIZE, MIN_BATCH_SIZE), exception.getMessage());
     }
@@ -104,7 +104,7 @@ class TppLogSourceConfigTest {
     void as_a_config_I_should_throw_a_config_exception_if_batch_size_is_too_big() {
         Map<String, Object> props = given_a_minimum_list_of_properties();
         given_this_is_overriden_with(BATCH_SIZE, TOO_LARGE_BATCH_SIZE, props);
-        Executable executingConfig = given_an_config_with(props);
+        Executable executingConfig = given_a_config_with(props);
         ConfigException exception = then_I_expect_a_config_exception_when_I_run_this(executingConfig);
         assertEquals(invalidConfigForTooLargeValue(BATCH_SIZE, TOO_LARGE_BATCH_SIZE, MAX_BATCH_SIZE), exception.getMessage());
     }
@@ -148,7 +148,7 @@ class TppLogSourceConfigTest {
 
     }
 
-    private Executable given_an_config_with(Map<String, Object> props) {
+    private Executable given_a_config_with(Map<String, Object> props) {
         return () -> new TppLogSourceConfig(props);
     }
 }

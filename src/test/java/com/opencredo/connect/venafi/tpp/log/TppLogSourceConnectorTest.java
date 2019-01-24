@@ -25,6 +25,8 @@ class TppLogSourceConnectorTest {
 
     public static final int ONE_MAX_TASK = 1;
     public static final int FIRST_VALUE_IN_LIST = 0;
+    public static final int EXPECTED_NUMBER_OF_LOG_ENTRIES_RETURNED_BY_MOCK = 2;
+    public static final int CALLED_ONCE = 1;
     private WireMockServer wireMockServer = new WireMockServer(
             new WireMockConfiguration().dynamicPort()
                     .extensions(new ResponseTemplateTransformer(false))
@@ -58,9 +60,9 @@ class TppLogSourceConnectorTest {
 
         when_the_task_is_started(sourceTask, taskProperties);
         List<SourceRecord> records = then_the_task_can_be_polled(sourceTask);
-        assertEquals(2, records.size());
-        wireMockServer.verify(1, postRequestedFor(urlPathMatching(AUTHORIZE_API_REGEX_PATH)));
-        wireMockServer.verify(1, getRequestedFor(urlPathMatching(LOG_API_REGEX_PATH)));
+        assertEquals(EXPECTED_NUMBER_OF_LOG_ENTRIES_RETURNED_BY_MOCK, records.size());
+        wireMockServer.verify(CALLED_ONCE, postRequestedFor(urlPathMatching(AUTHORIZE_API_REGEX_PATH)));
+        wireMockServer.verify(CALLED_ONCE, getRequestedFor(urlPathMatching(LOG_API_REGEX_PATH)));
     }
 
     private List<SourceRecord> then_the_task_can_be_polled(SourceTask sourceTask) throws InterruptedException {
