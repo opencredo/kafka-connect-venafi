@@ -31,7 +31,7 @@ class TppLogSourceConfigTest {
     }
 
     @Test
-    void as_a_config_I_should_throw_a_config_exception_if_minimum_properties_are_set() {
+    void as_a_config_I_should_not_throw_a_config_exception_if_minimum_properties_are_set() {
         Map<String, Object> props = given_a_minimum_list_of_properties();
         Executable executingConfig = given_an_config_with(props);
         then_I_expect_no_config_exception_when_run_this(executingConfig);
