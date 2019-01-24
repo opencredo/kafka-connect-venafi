@@ -16,7 +16,7 @@ import java.util.ArrayList;
 public class LogsClient {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(LogsClient.class);
 
-    public static LogResponse getLogs(String token, String date, String baseUrl, String batchSize, int offset) {
+    public static LogResponse getLogs(String token, String date, String baseUrl, String batchSize, long offset) {
         try {
             return Feign.builder()
                     .logger(new Slf4jLogger())

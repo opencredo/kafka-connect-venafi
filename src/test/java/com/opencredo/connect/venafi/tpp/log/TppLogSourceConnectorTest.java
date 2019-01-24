@@ -41,17 +41,9 @@ class TppLogSourceConnectorTest {
     }
 
     @Test
-    void as_a_connector_I_should_be_able_to_start_up_with_empty_properties() throws IllegalAccessException, InstantiationException, InterruptedException {
-        TppLogSourceConnector connector = given_a_connector();
-
-        when_the_connector_is_started_with_no_properties(connector);
-        SourceTask sourceTask = then_I_should_be_able_to_get_a_source_task_from_the_connector(connector);
-        Map<String, String> taskProperties = then_I_can_get_the_task_properties(connector);
-
-        when_the_task_is_started(sourceTask, taskProperties);
-        List<SourceRecord> records = then_the_task_can_be_polled(sourceTask);
-
-        assertEquals(0, records.size());
+    public void as_a_task_I_should_return_a_version() {
+        TppLogSourceConnector source = given_a_source();
+        assertEquals("1.0.0", source.version());
     }
 
     @Test
@@ -59,15 +51,16 @@ class TppLogSourceConnectorTest {
         given_the_mock_will_respond_to_auth();
         given_the_mock_will_respond_to_log();
 
-        TppLogSourceConnector connector = given_a_connector();
-
-        when_the_connector_is_started_with_no_properties(connector);
-        SourceTask sourceTask = then_I_should_be_able_to_get_a_source_task_from_the_connector(connector);
-        Map<String, String> taskProperties = then_I_can_get_the_task_properties(connector);
+        TppLogSourceConnector source = given_a_source();
+        when_the_source_is_started_with_minimum_properties(source);
+        SourceTask sourceTask = then_I_should_be_able_to_get_a_source_task_from_the_connector(source);
+        Map<String, String> taskProperties = then_I_can_get_the_task_properties(source);
 
         when_the_task_is_started(sourceTask, taskProperties);
         List<SourceRecord> records = then_the_task_can_be_polled(sourceTask);
-        assertEquals(0, records.size());
+        assertEquals(2, records.size());
+        wireMockServer.verify(1, postRequestedFor(urlPathMatching(AUTHORIZE_API_REGEX_PATH)));
+        wireMockServer.verify(1, getRequestedFor(urlPathMatching(LOG_API_REGEX_PATH)));
     }
 
     private List<SourceRecord> then_the_task_can_be_polled(SourceTask sourceTask) throws InterruptedException {
@@ -88,14 +81,21 @@ class TppLogSourceConnectorTest {
         return (SourceTask) task;
     }
 
-    private void when_the_connector_is_started_with_no_properties(TppLogSourceConnector connector) {
-        when_the_connector_is_started_with_properties(connector, new HashMap<>());
+    private void when_the_source_is_started_with_minimum_properties(TppLogSourceConnector source) {
+        Map<String, String> props = new HashMap<>();
+        props.put(TppLogSourceConfig.BASE_URL_CONFIG, wireMockServer.baseUrl());
+        props.put(TppLogSourceConfig.USERNAME_CONFIG, "placeholder_username");
+        props.put(TppLogSourceConfig.PASSWORD_CONFIG, "placeholder_password");
+
+
+        when_the_source_is_started_with_properties(source, props);
     }
 
-    private void when_the_connector_is_started_with_properties(TppLogSourceConnector connector,Map<String,String> props){
+    private void when_the_source_is_started_with_properties(TppLogSourceConnector connector, Map<String, String> props) {
         connector.start(props);
     }
-    private TppLogSourceConnector given_a_connector() {
+
+    private TppLogSourceConnector given_a_source() {
         return new TppLogSourceConnector();
     }
 

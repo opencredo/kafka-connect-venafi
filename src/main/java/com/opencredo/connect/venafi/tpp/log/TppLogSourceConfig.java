@@ -8,15 +8,12 @@ import java.util.Map;
 
 public class TppLogSourceConfig extends AbstractConfig {
     public static final String BASE_URL_CONFIG = "venafi.base.url";
-    private static final String BASE_URL_DEFAULT = "https://localhost:443/vedsdk";
     private static final String BASE_URL_DOC = "Url to TPP api with /VEDSDK";
 
     public static final String USERNAME_CONFIG = "venafi.username";
-    private static final String USERNAME_DEFAULT = "placeholder_username";
     private static final String USERNAME_DOC = "The username to use with the /VEDSDK api.";
 
     public static final String PASSWORD_CONFIG = "venafi.password";
-    private static final String PASSWORD_DEFAULT = "placeholder_password";
     private static final String PASSWORD_DOC = "The password to use with the /VEDSDK api.";
 
     public static final String TOPIC_CONFIG = "venafi.topic";
@@ -31,13 +28,15 @@ public class TppLogSourceConfig extends AbstractConfig {
     private static final int POLL_INTERVAL_DEFAULT = 1000;
     private static final String POLL_INTERVAL_DOC = "Poll interval in milliseconds.";
 
+    public static final int MAX_BATCH_SIZE = 10000;
+    public static final int MIN_BATCH_SIZE = 2;
     public static final ConfigDef CONFIG_DEF = new ConfigDef()
-            .define(BASE_URL_CONFIG, ConfigDef.Type.STRING, BASE_URL_DEFAULT, ConfigDef.Importance.HIGH, BASE_URL_DOC)
-            .define(TOPIC_CONFIG, ConfigDef.Type.STRING, TOPIC_DEFAULT, ConfigDef.Importance.HIGH, TOPIC_DOC)
-            .define(BATCH_SIZE, ConfigDef.Type.INT, BATCH_SIZE_DEFAULT, ConfigDef.Importance.LOW, BATCH_SIZE_DOC)
+            .define(BASE_URL_CONFIG, ConfigDef.Type.STRING, ConfigDef.NO_DEFAULT_VALUE,ConfigDef.NonEmptyStringWithoutControlChars.nonEmptyStringWithoutControlChars() , ConfigDef.Importance.HIGH, BASE_URL_DOC)
+            .define(TOPIC_CONFIG, ConfigDef.Type.STRING, TOPIC_DEFAULT, ConfigDef.NonEmptyStringWithoutControlChars.nonEmptyStringWithoutControlChars(), ConfigDef.Importance.HIGH, TOPIC_DOC)
+            .define(BATCH_SIZE, ConfigDef.Type.INT, BATCH_SIZE_DEFAULT, ConfigDef.Range.between(MIN_BATCH_SIZE, MAX_BATCH_SIZE), ConfigDef.Importance.LOW, BATCH_SIZE_DOC)
             .define(POLL_INTERVAL, ConfigDef.Type.INT, POLL_INTERVAL_DEFAULT, ConfigDef.Importance.LOW, POLL_INTERVAL_DOC)
-            .define(USERNAME_CONFIG, ConfigDef.Type.STRING, USERNAME_DEFAULT, ConfigDef.Importance.HIGH, USERNAME_DOC)
-            .define(PASSWORD_CONFIG, ConfigDef.Type.STRING, PASSWORD_DEFAULT, ConfigDef.Importance.HIGH, PASSWORD_DOC);
+            .define(USERNAME_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, USERNAME_DOC)
+            .define(PASSWORD_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, PASSWORD_DOC);
 
     public TppLogSourceConfig(Map<String, ?> props) {
         super(CONFIG_DEF, props);

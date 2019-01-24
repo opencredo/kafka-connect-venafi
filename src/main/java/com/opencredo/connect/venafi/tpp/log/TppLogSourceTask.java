@@ -24,7 +24,7 @@ public class TppLogSourceTask extends SourceTask {
     private String baseUrl;
     private String topic;
     private String batchSize;
-    private int apiOffset;
+    private long apiOffset;
     private Long interval;
     private Long last_execution = 0L;
     private TokenClient tokenClient;
@@ -35,7 +35,7 @@ public class TppLogSourceTask extends SourceTask {
 
     @Override
     public String version() {
-        return "1.0";
+        return VersionUtil.getVersion();
     }
 
     @Override
@@ -54,9 +54,9 @@ public class TppLogSourceTask extends SourceTask {
                 fromDate = lastRead;
             }
 
-            Integer lastApiOffset = (Integer) persistedMap.get(LAST_API_OFFSET);
-            if (lastApiOffset != null) {
-                apiOffset = lastApiOffset;
+            Object lastApiOffset = persistedMap.get(LAST_API_OFFSET);
+            if (lastApiOffset != null && lastApiOffset instanceof Long) {
+                apiOffset = (Long) lastApiOffset;
             }
 
 
@@ -90,7 +90,7 @@ public class TppLogSourceTask extends SourceTask {
 
     private List<SourceRecord> getTppLogsAsSourceRecords(String token) {
 
-        int loopOffset = 0;
+        long loopOffset = 0;
 
         List<EventLog> jsonLogs = getTppLogs(token, fromDate, apiOffset);
         ArrayList<SourceRecord> records = new ArrayList<>();
@@ -108,20 +108,20 @@ public class TppLogSourceTask extends SourceTask {
         return records;
     }
 
-    private SourceRecord buildSourceRecord(EventLog eventLog, String lastRead, Integer apiOffset) {
+    private SourceRecord buildSourceRecord(EventLog eventLog, String lastRead, Long apiOffset) {
         Map<String, Object> sourceOffset = buildSourceOffset(lastRead, apiOffset);
         Map<String, Object> sourcePartition = buildSourcePartition();
         return new SourceRecord(sourcePartition, sourceOffset, topic, EventLog.TppLogSchema(), eventLog.toStruct());
     }
 
-    private int calculateLoopOffset(int currentLoopOffset, String newFromDate, String oldFromDate) {
+    private long calculateLoopOffset(long currentLoopOffset, String newFromDate, String oldFromDate) {
         if (newFromDate.equals(oldFromDate)) {
             return ++currentLoopOffset;
         }
-        return 1;
+        return 1L;
     }
 
-    private int calculateApiOffset(int currentLoopOffset, List<EventLog> jsonLogs) {
+    private long calculateApiOffset(long currentLoopOffset, List<EventLog> jsonLogs) {
         if (jsonLogs.size() == currentLoopOffset) {
             return apiOffset + currentLoopOffset;
         }
@@ -132,14 +132,14 @@ public class TppLogSourceTask extends SourceTask {
         return Collections.singletonMap(URL, baseUrl);
     }
 
-    private Map<String, Object> buildSourceOffset(String lastRead, Integer apiOffset) {
+    private Map<String, Object> buildSourceOffset(String lastRead, Long apiOffset) {
         Map<String, Object> sourceOffset = new HashMap<>();
         sourceOffset.put(LAST_READ, lastRead);
         sourceOffset.put(LAST_API_OFFSET, apiOffset);
         return sourceOffset;
     }
 
-    List<EventLog> getTppLogs(String token, String date, int offset) {
+    List<EventLog> getTppLogs(String token, String date, long offset) {
         LogResponse logResponse = LogsClient.getLogs(token, date, baseUrl, batchSize, offset);
 
         return logResponse.getLogEvents();
