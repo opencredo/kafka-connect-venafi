@@ -43,6 +43,26 @@ public class EventLogSourceTaskTest {
         return TODAY.plusSeconds(seconds);
     }
 
+    static String createLogEventBody(ZonedDateTime dateTime) {
+        return "        {\n" +
+                "            \"ClientTimestamp\": \"" + dateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "\",\n" +
+                "            \"Component\": \"\\\\VED\\\\Policy\\\\certificates\\\\_Discovered\\\\TrustNet\\\\defaultwebsite.lab.venafi.com - 83\",\n" +
+                "            \"ComponentId\": 123185,\n" +
+                "            \"ComponentSubsystem\": \"Config\",\n" +
+                "            \"Data\": null,\n" +
+                "            \"Grouping\": 0,\n" +
+                "            \"Id\": 1835016,\n" +
+                "            \"Name\": \"Certificate Revocation - CRL Failure\",\n" +
+                "            \"ServerTimestamp\": \"" + dateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "\",\n" +
+                "            \"Severity\": \"Info\",\n" +
+                "            \"SourceIP\": \"[::1]\",\n" +
+                "            \"Text1\": \"CN=traininglab-Root-CA, DC=traininglab, DC=local\",\n" +
+                "            \"Text2\": \"ldap:///CN=traininglab-Root-CA(1),CN=server1,CN=CDP,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=traininglab,DC=local?certificateRevocationList?base?objectClass=cRLDistributionPoint\",\n" +
+                "            \"Value1\": 0,\n" +
+                "            \"Value2\": 0\n" +
+                "        }\n";
+    }
+
     String getStringOfTodayPlus(int seconds) {
         return getTodayPlus(seconds).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
@@ -126,7 +146,6 @@ public class EventLogSourceTaskTest {
 
     }
 
-
     @Test
     public void as_a_task_I_want_a_valid_context() {
         SourceTaskContext mockSourceTaskContext = given_a_mock_source_context_with(getTodayPlus(2), 1L);
@@ -184,7 +203,6 @@ public class EventLogSourceTaskTest {
         then_the_logs_are_of_size(logs, 0);
     }
 
-
     @Test
     public void as_a_client_I_want_to_paginate_logs() {
 
@@ -225,7 +243,6 @@ public class EventLogSourceTaskTest {
         SourceRecord record = new SourceRecord(Collections.emptyMap(), Collections.emptyMap(), "", TppLogSchema(), struct);
         System.out.println(record);
     }
-
 
     private List<SourceRecord> when_the_task_is_polled(TppLogSourceTask task) {
         return task.poll();
@@ -443,26 +460,6 @@ public class EventLogSourceTaskTest {
                         "    ]\n" +
                         "}")
                 ));
-    }
-
-    static String createLogEventBody(ZonedDateTime dateTime) {
-        return "        {\n" +
-                "            \"ClientTimestamp\": \"" + dateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "\",\n" +
-                "            \"Component\": \"\\\\VED\\\\Policy\\\\certificates\\\\_Discovered\\\\TrustNet\\\\defaultwebsite.lab.venafi.com - 83\",\n" +
-                "            \"ComponentId\": 123185,\n" +
-                "            \"ComponentSubsystem\": \"Config\",\n" +
-                "            \"Data\": null,\n" +
-                "            \"Grouping\": 0,\n" +
-                "            \"Id\": 1835016,\n" +
-                "            \"Name\": \"Certificate Revocation - CRL Failure\",\n" +
-                "            \"ServerTimestamp\": \"" + dateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME) + "\",\n" +
-                "            \"Severity\": \"Info\",\n" +
-                "            \"SourceIP\": \"[::1]\",\n" +
-                "            \"Text1\": \"CN=traininglab-Root-CA, DC=traininglab, DC=local\",\n" +
-                "            \"Text2\": \"ldap:///CN=traininglab-Root-CA(1),CN=server1,CN=CDP,CN=Public%20Key%20Services,CN=Services,CN=Configuration,DC=traininglab,DC=local?certificateRevocationList?base?objectClass=cRLDistributionPoint\",\n" +
-                "            \"Value1\": 0,\n" +
-                "            \"Value2\": 0\n" +
-                "        }\n";
     }
 
 }

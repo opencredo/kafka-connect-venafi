@@ -31,8 +31,8 @@ public class TppLogSourceConfig extends AbstractConfig {
     public static final int MAX_BATCH_SIZE = 10000;
     public static final int MIN_BATCH_SIZE = 2;
     public static final ConfigDef CONFIG_DEF = new ConfigDef()
-            .define(BASE_URL_CONFIG, ConfigDef.Type.STRING, ConfigDef.NO_DEFAULT_VALUE,ConfigDef.NonEmptyStringWithoutControlChars.nonEmptyStringWithoutControlChars() , ConfigDef.Importance.HIGH, BASE_URL_DOC)
-            .define(TOPIC_CONFIG, ConfigDef.Type.STRING, TOPIC_DEFAULT, ConfigDef.NonEmptyStringWithoutControlChars.nonEmptyStringWithoutControlChars(), ConfigDef.Importance.HIGH, TOPIC_DOC)
+            .define(BASE_URL_CONFIG, ConfigDef.Type.STRING, ConfigDef.NO_DEFAULT_VALUE, new NonEmptyStringWithoutControlChars(), ConfigDef.Importance.HIGH, BASE_URL_DOC)
+            .define(TOPIC_CONFIG, ConfigDef.Type.STRING, TOPIC_DEFAULT, new NonEmptyStringWithoutControlChars(), ConfigDef.Importance.HIGH, TOPIC_DOC)
             .define(BATCH_SIZE, ConfigDef.Type.INT, BATCH_SIZE_DEFAULT, ConfigDef.Range.between(MIN_BATCH_SIZE, MAX_BATCH_SIZE), ConfigDef.Importance.LOW, BATCH_SIZE_DOC)
             .define(POLL_INTERVAL, ConfigDef.Type.INT, POLL_INTERVAL_DEFAULT, ConfigDef.Importance.LOW, POLL_INTERVAL_DOC)
             .define(USERNAME_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, USERNAME_DOC)
@@ -58,3 +58,12 @@ public class TppLogSourceConfig extends AbstractConfig {
         return config;
     }
 }
+
+final class NonEmptyStringWithoutControlChars extends ConfigDef.NonEmptyStringWithoutControlChars {
+    //Only here to create nice human readable for exporting to documentation.
+    @Override
+    public String toString() {
+        return "non-empty string and no ISO control characters";
+    }
+}
+
