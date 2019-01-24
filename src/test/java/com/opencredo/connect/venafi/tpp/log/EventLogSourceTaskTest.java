@@ -195,7 +195,6 @@ public class EventLogSourceTaskTest {
     public void as_a_client_I_want_some_logs_and_handle_token_expiry() {
 
         given_the_mock_will_respond_to_auth();
-//        given_the_mock_will_respond_to_log();
         given_the_mock_will_respond_to_log_as_expired_token();
         TppLogSourceTask task = given_a_task_is_setup();
 
