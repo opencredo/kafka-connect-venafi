@@ -20,7 +20,7 @@ class TppLogSourceConfigTest {
     @Test
     void as_a_Config_I_should_be_able_to_generate_a_guide() {
         assertNotNull(CONFIG_DEF.toEnrichedRst());
-        assertNotEquals("", CONFIG_DEF.toEnrichedRst());
+        assertNotEquals("", CONFIG_DEF.toEnrichedRst().trim());
     }
 
     @Test
