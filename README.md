@@ -9,7 +9,7 @@ Description
 This connector connects via HTTP to your instance of the Venafi Trust Protection Platform ( which shall be referred to as TPP from here on) and pulls your Log events into Kafka, allowing you to do any filtering/transforming/processing you'd like to do within a comfortable Kafka environment.  
  **N.B.** Currently the connector starts from the beginning of time (i.e. processes all past events first), a future release will allow the option of starting from now (i.e. skipping all previous events).
 
-EventLog object produced by this source **Connector** as defined by the Venafi WebSDK
+###### EventLog object produced by this source Connector as defined by the Venafi WebSDK
 * **ClientTimestamp**: The time that the client generated the event.
 * **Component**: A string that identifies a component DN. For events that occur in a subsystem other than Config, such as a Secret Store, the Distinguished Name (DN) component may be blank.
 * **ComponentId**: The component ID that originated the event.
