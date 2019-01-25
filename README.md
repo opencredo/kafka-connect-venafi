@@ -14,14 +14,14 @@ This connector connects via HTTP to your instance of the Venafi Trust Protection
 * **Component**: A string that identifies a component DN. For events that occur in a subsystem other than Config, such as a Secret Store, the Distinguished Name (DN) component may be blank.
 * **ComponentId**: The component ID that originated the event.
 * **ComponentSubsystem**: The component subsytem that originated the event.
-* **Grouping**: An integer for the component ID or Group Id that correlates to a set of events.
+* **Grouping**: An integer for the Component ID or Group Id that correlates to a set of events.
 * **Id**: A hexadecimal value that corresponds to an Event ID.
 * **Name**: The event name.
 * **ServerTimestamp**: The time the Trust Protection Platform server received the event.
-* **Severity**: A string value for one of these event severity: Emergency, Alert, Critical, Error, Warning, Notice, Info, or Debug
-* **SourceIP**: The IP address of the host that originated the event
-* **Text1**: A string variable, that contains all or part of an event message.
-* **Text2**: An additional string if present, that appears as part of an event message.
+* **Severity**: A string value for one of these event severities: _Emergency, Alert, Critical, Error, Warning, Notice, Info, or Debug_
+* **SourceIP**: The IP address of the host that originated the event.
+* **Text1**: A string variable that contains all or part of an event message.
+* **Text2**: An additional string, if present, that appears as part of an event message.
 * **Value1**: An integer variable, if present, that appears as part of an event message.
 * **Value2**: An additional integer variable, if present, that appears as part of an event message.
 
