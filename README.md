@@ -96,7 +96,7 @@ sudo bin/confluent log connect
   * Importance: high
 
 ``venafi.batch.size``
-  Window of data to pull from log api.
+  Window of data to pull from log API.
 
   * Type: int
   * Default: 100
