@@ -1,6 +1,5 @@
 package com.opencredo.connect.venafi.tpp.log.model;
 
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
@@ -65,7 +64,6 @@ public class EventLog {
     private Integer Value1;
     private Integer Value2;
 
-    @VisibleForTesting
     EventLog(ZonedDateTime clientTimestamp, String component, Integer componentId, String componentSubsystem, Integer grouping, Long id, String eventId, String name, String data, ZonedDateTime serverTimestamp, String severity, String sourceIP, String text1, String text2, Integer value1, Integer value2) {
         ClientTimestamp = clientTimestamp;
         Component = component;
