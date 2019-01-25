@@ -17,7 +17,7 @@ public interface TppLog {
     String ORDERING = "ServerTimestamp";
     String OFFSET = "OFFSET";
 
-    @RequestLine("GET /Log")
+    @RequestLine("GET /vedsdk/Log")
     @Headers({"Content-Type: application/json", "X-Venafi-Api-Key: {token}"})
     LogResponse getLogs(@Param("token") String token, @QueryMap Map<String, Object> queryMap);
 

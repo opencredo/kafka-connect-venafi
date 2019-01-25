@@ -8,7 +8,7 @@ import feign.RequestLine;
 public interface TppPlatformAuthorization {
 
 
-    @RequestLine("POST /authorize/")
+    @RequestLine("POST /vedsdk/authorize/")
     @Headers("Content-Type: application/json")
     TppToken getToken(Credentials credentials);
 
