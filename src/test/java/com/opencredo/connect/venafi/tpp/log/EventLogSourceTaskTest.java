@@ -31,8 +31,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class EventLogSourceTaskTest {
 
-    public static final String LOG_API_REGEX_PATH = "/[Ll]og/?";
-    public static final String AUTHORIZE_API_REGEX_PATH = "/[Aa]uthorize/?";
+    public static final String LOG_API_REGEX_PATH = "/vedsdk/[Ll]og/?";
+    public static final String AUTHORIZE_API_REGEX_PATH = "/vedsdk/[Aa]uthorize/?";
     private static final ZonedDateTime TODAY = ZonedDateTime.now();
     private WireMockServer wireMockServer = new WireMockServer(
             new WireMockConfiguration().dynamicPort()
@@ -374,7 +374,7 @@ public class EventLogSourceTaskTest {
                         "    ]\n" +
                         "}")
                 ));
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+        wireMockServer.stubFor(get(urlPathMatching(LOG_API_REGEX_PATH))
                 .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(5)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(1)))
                 .willReturn(okJson("{\n" +
@@ -387,7 +387,7 @@ public class EventLogSourceTaskTest {
                         "    ]\n" +
                         "}")
                 ));
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+        wireMockServer.stubFor(get(urlPathMatching(LOG_API_REGEX_PATH))
                 .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(5)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(6)))
                 .willReturn(okJson("{\n" +
@@ -399,7 +399,7 @@ public class EventLogSourceTaskTest {
                         "    ]\n" +
                         "}")
                 ));
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+        wireMockServer.stubFor(get(urlPathMatching(LOG_API_REGEX_PATH))
                 .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(7)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(1)))
                 .willReturn(okJson("{\n" +
@@ -415,7 +415,7 @@ public class EventLogSourceTaskTest {
 
     private void given_the_mock_will_respond_to_log_for_offsetsStorage() {
 
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+        wireMockServer.stubFor(get(urlPathMatching(LOG_API_REGEX_PATH))
                 .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(2)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(1)))
                 .willReturn(aResponse().withBody("{\n" +
@@ -426,7 +426,7 @@ public class EventLogSourceTaskTest {
                         "    ]\n" +
                         "}")
                 ));
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+        wireMockServer.stubFor(get(urlPathMatching(LOG_API_REGEX_PATH))
                 .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(9)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(2)))
                 .willReturn(aResponse().withBody("{\n" +
@@ -439,7 +439,7 @@ public class EventLogSourceTaskTest {
 
     private void given_the_mock_will_respond_to_log_for_empty_offsetsStorage() {
 
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+        wireMockServer.stubFor(get(urlPathMatching(LOG_API_REGEX_PATH))
                 .withQueryParam(FROM_TIME, equalTo(DEFAULT_FROM_TIME))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(0)))
                 .willReturn(aResponse().withBody("{\n" +
@@ -450,7 +450,7 @@ public class EventLogSourceTaskTest {
                         "    ]\n" +
                         "}")
                 ));
-        wireMockServer.stubFor(get(urlPathMatching("/[Ll]og"))
+        wireMockServer.stubFor(get(urlPathMatching(LOG_API_REGEX_PATH))
                 .withQueryParam(FROM_TIME, equalTo(getStringOfTodayPlus(100)))
                 .withQueryParam(OFFSET, equalTo(String.valueOf(1)))
                 .willReturn(aResponse().withBody("{\n" +
