@@ -69,26 +69,26 @@ sudo bin/confluent log connect
 # Config Definitions explained.
 
 ``venafi.base.url``
-  Url to TPP api with /VEDSDK
+  URL to TPP API
 
   * Type: string
   * Valid Values: non-empty string and no ISO control characters
   * Importance: high
 
 ``venafi.password``
-  The password to use with the /VEDSDK api.
+  The password to use with the api.
 
   * Type: string
   * Importance: high
 
 ``venafi.username``
-  The username to use with the /VEDSDK api.
+  The username to use with the api.
 
   * Type: string
   * Importance: high
 
 ``venafi.topic``
-  TOPIC to publish TPP log data to.
+  Topic to publish TPP log data to.
 
   * Type: string
   * Default: TPP-LOGS
@@ -109,5 +109,7 @@ sudo bin/confluent log connect
   * Type: int
   * Default: 1000
   * Importance: low
+
+
 
 
