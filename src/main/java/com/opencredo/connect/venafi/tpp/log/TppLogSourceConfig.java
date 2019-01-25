@@ -11,10 +11,10 @@ public class TppLogSourceConfig extends AbstractConfig {
     private static final String BASE_URL_DOC = "URL to TPP API";
 
     public static final String USERNAME_CONFIG = "venafi.username";
-    private static final String USERNAME_DOC = "The username to use with the api.";
+    private static final String USERNAME_DOC = "The username to use with the API.";
 
     public static final String PASSWORD_CONFIG = "venafi.password";
-    private static final String PASSWORD_DOC = "The password to use with the api.";
+    private static final String PASSWORD_DOC = "The password to use with the API.";
 
     public static final String TOPIC_CONFIG = "venafi.topic";
     private static final String TOPIC_DEFAULT = "TPP-LOGS";
@@ -22,7 +22,7 @@ public class TppLogSourceConfig extends AbstractConfig {
 
     public static final String BATCH_SIZE = "venafi.batch.size";
     private static final int BATCH_SIZE_DEFAULT = 100;
-    private static final String BATCH_SIZE_DOC = "Window of data to pull from log api.";
+    private static final String BATCH_SIZE_DOC = "Window of data to pull from log API.";
 
     public static final String POLL_INTERVAL = "venafi.poll.interval";
     private static final int POLL_INTERVAL_DEFAULT = 1000;

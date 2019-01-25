@@ -50,7 +50,7 @@ Make sure to replace the items with the <> brackets with what's needed to connec
 For more information please look at the [Confluent instructions on manually installing connectors](https://docs.confluent.io/current/connect/managing/install.html#connect-install-connectors).
 
 ---
-If you need to unload/reload the connector use: `<path-to-confluent>/bin/confluent unload venafi`  
+If you need to unload/reload the connector, use: `<path-to-confluent>/bin/confluent unload venafi`  
 If you intend to change the JAR please stop, change the JAR, then start the cluster.  
 
 # Useful commands while developing
@@ -76,13 +76,13 @@ sudo bin/confluent log connect
   * Importance: high
 
 ``venafi.password``
-  The password to use with the api.
+  The password to use with the API.
 
   * Type: string
   * Importance: high
 
 ``venafi.username``
-  The username to use with the api.
+  The username to use with the API.
 
   * Type: string
   * Importance: high
