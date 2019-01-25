@@ -50,7 +50,7 @@ Make sure to replace the items with the <> brackets with what's needed to connec
 For more information please look at the [Confluent instructions on manually installing connectors](https://docs.confluent.io/current/connect/managing/install.html#connect-install-connectors).
 
 ---
-If you need to unload/reload it use: `<path-to-confluent>/bin/confluent unload venafi`  
+If you need to unload/reload the connector use: `<path-to-confluent>/bin/confluent unload venafi`  
 If you intend to change the JAR please stop, change the JAR, then start the cluster.  
 
 # Useful commands while developing
