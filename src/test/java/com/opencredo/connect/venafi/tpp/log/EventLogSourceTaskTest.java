@@ -33,6 +33,7 @@ public class EventLogSourceTaskTest {
 
     public static final String LOG_API_REGEX_PATH = "/vedsdk/[Ll]og/?";
     public static final String AUTHORIZE_API_REGEX_PATH = "/vedsdk/[Aa]uthorize/?";
+
     private static final ZonedDateTime TODAY = ZonedDateTime.now();
     private WireMockServer wireMockServer = new WireMockServer(
             new WireMockConfiguration().dynamicPort()
@@ -80,7 +81,7 @@ public class EventLogSourceTaskTest {
     @Test
     public void as_a_task_I_should_return_a_version() {
         TppLogSourceTask task = given_a_task_is_setup();
-        assertEquals("1.0.0", task.version());
+        assertEquals("test-version", task.version());
     }
 
     @Test
