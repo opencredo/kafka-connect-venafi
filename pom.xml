@@ -8,6 +8,10 @@
     <name>kafka-connect-venafi-tpp</name>
     <description>Kafka connector for Venafi Trust Protection Platform Security Events</description>
 
+    <scm>
+        <url>https://github.com/opencredo/kafka-connect-venafi-tpp.git</url>
+        <developerConnection>scm:git:https://github.com/opencredo/kafka-connect-venafi-tpp.git</developerConnection>
+    </scm>
     <properties>
         <java.version>1.8</java.version>
         <junit-5.version>5.3.2</junit-5.version>
@@ -223,6 +227,11 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
             </plugin>
         </plugins>
     </build>
