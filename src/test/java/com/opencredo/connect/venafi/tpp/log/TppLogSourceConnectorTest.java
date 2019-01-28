@@ -45,7 +45,7 @@ class TppLogSourceConnectorTest {
     @Test
     public void as_a_task_I_should_return_a_version() {
         TppLogSourceConnector source = given_a_source();
-        assertEquals("1.0.0", source.version());
+        assertEquals("0.9.1-SNAPSHOT", source.version());
     }
 
     @Test

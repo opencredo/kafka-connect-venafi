@@ -80,7 +80,7 @@ public class EventLogSourceTaskTest {
     @Test
     public void as_a_task_I_should_return_a_version() {
         TppLogSourceTask task = given_a_task_is_setup();
-        assertEquals("1.0.0", task.version());
+        assertEquals("0.9.1-SNAPSHOT", task.version());
     }
 
     @Test
