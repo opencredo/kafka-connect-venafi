@@ -19,7 +19,7 @@ public class TppLogSourceTask extends SourceTask {
     public static final String LAST_READ = "last_read";
     public static final String LAST_API_OFFSET = "last_api_offset";
     public static final String DEFAULT_FROM_TIME = "1984-05-04T00:00:00.0000000Z";
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(TppLogSourceConnector.class);
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(TppLogSourceTask.class);
     private String fromDate = DEFAULT_FROM_TIME;
     private String baseUrl;
     private String topic;
@@ -55,7 +55,7 @@ public class TppLogSourceTask extends SourceTask {
             }
 
             Object lastApiOffset = persistedMap.get(LAST_API_OFFSET);
-            if (lastApiOffset != null && lastApiOffset instanceof Long) {
+            if (lastApiOffset != null) {
                 apiOffset = (Long) lastApiOffset;
             }
 

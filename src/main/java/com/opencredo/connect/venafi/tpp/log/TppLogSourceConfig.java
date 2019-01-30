@@ -42,14 +42,6 @@ public class TppLogSourceConfig extends AbstractConfig {
         super(CONFIG_DEF, props);
     }
 
-    private TppLogSourceConfig(ConfigDef definition, Map<?, ?> originals, boolean doLog) {
-        super(definition, originals, doLog);
-    }
-
-    private TppLogSourceConfig(ConfigDef definition, Map<?, ?> originals) {
-        super(definition, originals);
-    }
-
     Map<String, String> returnPropertiesWithDefaultsValuesIfMissing() {
         Map<String, ?> uncastProperties = this.values();
         Map<String, String> config = new HashMap<>(uncastProperties.size());
