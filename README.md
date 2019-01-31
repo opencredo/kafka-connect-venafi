@@ -3,6 +3,10 @@
 
 kafka-connect-venafi-tpp is a [Kafka connector](http://kafka.apache.org/documentation.html#connect) for Venafi Trust Protection Platform security events.
 
+| Connector Version | Source Technology Version | Confluent Platorm Version |   
+| --- | --- | --- |  
+| 0.9.3 | Venafi Trust Protection Platform 18.X | Compatible Confluent Platform Version - ≥5.0.X |  
+---
 
 Description
 ---
@@ -27,6 +31,8 @@ This connector connects via HTTP to your instance of the Venafi Trust Protection
 
 ---
 
+
+
 # Development
 To manually install the connector:
 1. Build the JAR with `mvn package`
@@ -43,6 +49,7 @@ venafi.password=<your_api_password>
 This is filled with the minimum values required, any default values are provided by the [config definition class](./src/main/java/com/opencredo/connect/venafi/tpp/log/TppLogSourceConfig.java). 
 This can also be looked at for more information on configuration, or look at the [wiki on the config definitions.](https://github.com/opencredo/kafka-connect-venafi-tpp/wiki/Config-Definitions-explained.)
 Make sure to replace the items with the <> brackets with what's needed to connect to your Venafi TPP/VEDSDK instance.   
+There is a quickstart properties file included with the code [here](./config/source-quickstart.properties) which has some dummy values for your base Url, username & password but can be used as an example.  
 4. Create a directory and place the JAR file in it, e.g. `<path-to-confluent>/share/java/kafka-connect-venafi-tpp`.  
 5. Then call: `<path-to-confluent>/bin/confluent load venafi -d venafi.properties`  
 
