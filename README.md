@@ -3,6 +3,10 @@
 
 kafka-connect-venafi-tpp is a [Kafka connector](http://kafka.apache.org/documentation.html#connect) for Venafi Trust Protection Platform security events.
 
+| Connector Version | Source Technology Version | Confluent Platorm Version |   
+| --- | --- | --- |  
+| 0.9.3 | Venafi Trust Protection Platform 18.X | Compatible Confluent Platform Version - ≥5.0.X |  
+---
 
 Description
 ---
@@ -26,6 +30,8 @@ This connector connects via HTTP to your instance of the Venafi Trust Protection
 * **Value2**: An additional integer variable, if present, that appears as part of an event message.
 
 ---
+
+
 
 # Development
 To manually install the connector:
