@@ -32,6 +32,9 @@
             <useProjectArtifact>true</useProjectArtifact>
             <useTransitiveFiltering>true</useTransitiveFiltering>
             <excludes>
+                <exclude>io.confluent.*</exclude>
+                <exclude>org.apache,kafka.connect.*</exclude>
+                <exclude>org.apache.kafka.connect.*</exclude>
                 <exclude>org.apache.kafka:connect-api</exclude>
             </excludes>
         </dependencySet>
