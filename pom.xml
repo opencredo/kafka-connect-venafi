@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.opencredo</groupId>
     <artifactId>kafka-connect-venafi-tpp</artifactId>
-    <version>0.9.3-SNAPSHOT</version>
+    <version>0.9.3</version>
     <name>kafka-connect-venafi-tpp</name>
     <description>Kafka connector for Venafi Trust Protection Platform Security Events</description>
 
     <scm>
         <url>https://github.com/opencredo/kafka-connect-venafi-tpp.git</url>
         <developerConnection>scm:git:https://github.com/opencredo/kafka-connect-venafi-tpp.git</developerConnection>
-      <tag>HEAD</tag>
+      <tag>0.9.3</tag>
   </scm>
     <properties>
         <java.version>1.8</java.version>
