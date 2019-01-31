@@ -3,12 +3,15 @@ package com.opencredo.connect.venafi.tpp.log;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
+import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -18,8 +21,7 @@ import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.opencredo.connect.venafi.tpp.log.EventLogSourceTaskTest.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TppLogSourceConnectorTest {
 
@@ -27,6 +29,7 @@ class TppLogSourceConnectorTest {
     public static final int FIRST_VALUE_IN_LIST = 0;
     public static final int EXPECTED_NUMBER_OF_LOG_ENTRIES_RETURNED_BY_MOCK = 2;
     public static final int CALLED_ONCE = 1;
+    public static final int TEN_MAX_TASKS = 10;
     private WireMockServer wireMockServer = new WireMockServer(
             new WireMockConfiguration().dynamicPort()
                     .extensions(new ResponseTemplateTransformer(false))
@@ -43,7 +46,7 @@ class TppLogSourceConnectorTest {
     }
 
     @Test
-    public void as_a_task_I_should_return_a_version() {
+    public void as_a_connector_I_should_return_a_version() {
         TppLogSourceConnector source = given_a_source();
         assertEquals("test-version", source.version());
     }
@@ -65,6 +68,41 @@ class TppLogSourceConnectorTest {
         wireMockServer.verify(CALLED_ONCE, getRequestedFor(urlPathMatching(LOG_API_REGEX_PATH)));
     }
 
+    @Test
+    void as_a_connector_I_should_only_return_one_config_even_if_more_are_provided() throws IllegalAccessException, InstantiationException {
+        TppLogSourceConnector source = given_a_source();
+        when_the_source_is_started_with_minimum_properties(source);
+        SourceTask sourceTask = then_I_should_be_able_to_get_a_source_task_from_the_connector(source);
+        List<Map<String, String>> taskProperties = then_I_can_get_the_task_properties(TEN_MAX_TASKS, source);
+        assertEquals(taskProperties.size(), 1);
+    }
+
+    @Test
+    void as_a_connector_I_should_throw_config_exception_if_provided_invalid_config() {
+        TppLogSourceConnector source = given_a_source();
+        Executable executingConfig = when_the_source_is_started_with_invalid_config(source);
+        then_I_expect_a_(ConnectException.class, executingConfig);
+    }
+
+    @Test
+    void as_a_connector_I_should_have_a_not_null_config_definition() {
+        TppLogSourceConnector source = given_a_source();
+        ConfigDef retrievedConfig = when_the_config_def_is_retrieved(source);
+        assertNotNull(retrievedConfig);
+    }
+
+    private void then_I_expect_a_(Class<? extends Exception> clazz, Executable executingConfig) {
+        assertThrows(clazz, executingConfig);
+    }
+
+    private Executable when_the_source_is_started_with_invalid_config(TppLogSourceConnector source) {
+        return () -> when_the_source_is_started_with_properties(source, new HashMap<>());
+    }
+
+    private ConfigDef when_the_config_def_is_retrieved(TppLogSourceConnector source) {
+        return source.config();
+    }
+
     private List<SourceRecord> then_the_task_can_be_polled(SourceTask sourceTask) throws InterruptedException {
         return sourceTask.poll();
     }
@@ -74,7 +112,11 @@ class TppLogSourceConnectorTest {
     }
 
     private Map<String, String> then_I_can_get_the_task_properties(TppLogSourceConnector connector) {
-        return connector.taskConfigs(ONE_MAX_TASK).get(FIRST_VALUE_IN_LIST);
+        return then_I_can_get_the_task_properties(ONE_MAX_TASK, connector).get(FIRST_VALUE_IN_LIST);
+    }
+
+    private List<Map<String, String>> then_I_can_get_the_task_properties(int maxTasks, TppLogSourceConnector connector) {
+        return connector.taskConfigs(maxTasks);
     }
 
     private SourceTask then_I_should_be_able_to_get_a_source_task_from_the_connector(TppLogSourceConnector connector) throws InstantiationException, IllegalAccessException {

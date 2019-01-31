@@ -119,6 +119,21 @@ public class EventLogSourceTaskTest {
     }
 
     @Test
+    public void as_a_task_I_want_to_make_only_one_logs_call_per_the_poll_interval() {
+
+        given_the_mock_will_respond_to_auth();
+        given_the_mock_will_respond_to_log();
+        TppLogSourceTask task = given_a_task_is_setup_with(1000000);
+
+        List<SourceRecord> logs = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(logs, 2);
+        List<SourceRecord> logs2 = when_the_task_is_polled(task);
+        then_the_logs_are_of_size(logs2, 0);
+        wireMockServer.verify(1, postRequestedFor(urlPathMatching(AUTHORIZE_API_REGEX_PATH)));
+        wireMockServer.verify(1, getRequestedFor(urlPathMatching(LOG_API_REGEX_PATH)));
+    }
+
+    @Test
     public void as_a_client_I_want_a_token_to_only_generate_once_while_before_token_expiry() {
 
 
@@ -154,7 +169,7 @@ public class EventLogSourceTaskTest {
         given_the_mock_will_respond_to_auth();
         given_the_mock_will_respond_to_log_for_offsetsStorage();
 
-        TppLogSourceTask task = given_a_task_is_setup_with(mockSourceTaskContext);
+        TppLogSourceTask task = given_a_task_is_setup(mockSourceTaskContext);
 
 
         List<SourceRecord> sourceRecords1 = when_the_task_is_polled(task);
@@ -171,7 +186,7 @@ public class EventLogSourceTaskTest {
         given_the_mock_will_respond_to_auth();
         given_the_mock_will_respond_to_log_for_empty_offsetsStorage();
 
-        TppLogSourceTask task = given_a_task_is_setup_with(mockSourceTaskContext);
+        TppLogSourceTask task = given_a_task_is_setup(mockSourceTaskContext);
 
         List<SourceRecord> sourceRecords1 = when_the_task_is_polled(task);
         then_the_logs_are_of_size(sourceRecords1, 3);
@@ -281,7 +296,7 @@ public class EventLogSourceTaskTest {
         return task.getToken();
     }
 
-    private TppLogSourceTask given_a_task_is_setup_with(SourceTaskContext context) {
+    private TppLogSourceTask given_a_task_is_setup(SourceTaskContext context) {
         TppLogSourceTask task = new TppLogSourceTask();
         Map<String, String> config = getTaskConfig();
         if (context != null) {
@@ -291,8 +306,16 @@ public class EventLogSourceTaskTest {
         return task;
     }
 
+    private TppLogSourceTask given_a_task_is_setup_with(Integer pollInterval) {
+        TppLogSourceTask task = new TppLogSourceTask();
+        Map<String, String> config = getTaskConfig();
+        config.put(POLL_INTERVAL, String.valueOf(pollInterval));
+        task.start(config);
+        return task;
+    }
+
     private TppLogSourceTask given_a_task_is_setup() {
-        return given_a_task_is_setup_with(null);
+        return given_a_task_is_setup(null);
     }
 
     private Map<String, String> getTaskConfig() {
