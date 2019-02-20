@@ -127,6 +127,7 @@ public class EventLogSourceTaskTest {
 
         List<SourceRecord> logs = when_the_task_is_polled(task);
         then_the_logs_are_of_size(logs, 2);
+        then_the_logs_will_have_some_records_with_some_offset(logs, 2, 1L);
         List<SourceRecord> logs2 = when_the_task_is_polled(task);
         then_the_logs_are_of_size(logs2, 0);
         wireMockServer.verify(1, postRequestedFor(urlPathMatching(AUTHORIZE_API_REGEX_PATH)));
@@ -174,9 +175,13 @@ public class EventLogSourceTaskTest {
 
         List<SourceRecord> sourceRecords1 = when_the_task_is_polled(task);
         then_the_logs_are_of_size(sourceRecords1, 3);
+        then_the_logs_will_have_some_records_with_some_offset(sourceRecords1, 2, 1L);
+        then_the_logs_will_have_some_records_with_some_offset(sourceRecords1, 1, 2L);
+
 
         List<SourceRecord> sourceRecords2 = when_the_task_is_polled(task);
         then_the_logs_are_of_size(sourceRecords2, 1);
+        then_the_logs_will_have_some_records_with_some_offset(sourceRecords2, 1, 3L);
     }
 
     @Test
@@ -190,9 +195,13 @@ public class EventLogSourceTaskTest {
 
         List<SourceRecord> sourceRecords1 = when_the_task_is_polled(task);
         then_the_logs_are_of_size(sourceRecords1, 3);
+        then_the_logs_will_have_some_records_with_some_offset(sourceRecords1, 2, 1L);
+        then_the_logs_will_have_some_records_with_some_offset(sourceRecords1, 1, 2L);
+
 
         List<SourceRecord> sourceRecords2 = when_the_task_is_polled(task);
         then_the_logs_are_of_size(sourceRecords2, 1);
+        then_the_logs_will_have_some_records_with_some_offset(sourceRecords2, 1, 2L);
     }
 
     @Test
@@ -205,6 +214,7 @@ public class EventLogSourceTaskTest {
 
         List<SourceRecord> logs = when_the_task_is_polled(task);
         then_the_logs_are_of_size(logs, 2);
+        then_the_logs_will_have_some_records_with_some_offset(logs, 2, 1L);
     }
 
     @Test
@@ -228,17 +238,33 @@ public class EventLogSourceTaskTest {
 
         List<SourceRecord> page_1_of_logs = when_the_task_is_polled(task);
         then_the_logs_are_of_size(page_1_of_logs, 5);
+
+        then_the_logs_will_have_some_records_with_some_offset(page_1_of_logs, 5, 1L);
         //get next page
         List<SourceRecord> page_2_of_logs = when_the_task_is_polled(task);
         then_the_logs_are_of_size(page_2_of_logs, 5);
         then_the_number_of_logs_with_timestamp_is(5, page_2_of_logs, getTodayPlus(5));
+        then_the_logs_will_have_some_records_with_some_offset(page_2_of_logs, 1, 2L);
+        then_the_logs_will_have_some_records_with_some_offset(page_2_of_logs, 1, 3L);
+        then_the_logs_will_have_some_records_with_some_offset(page_2_of_logs, 1, 4L);
+        then_the_logs_will_have_some_records_with_some_offset(page_2_of_logs, 1, 5L);
+        then_the_logs_will_have_some_records_with_some_offset(page_2_of_logs, 1, 6L);
         //get next Page
         List<SourceRecord> page_3_of_logs = when_the_task_is_polled(task);
         then_the_logs_are_of_size(page_3_of_logs, 4);
         then_the_number_of_logs_with_timestamp_is(2, page_3_of_logs, getTodayPlus(6));
+        then_the_logs_will_have_some_records_with_some_offset(page_3_of_logs, 1, 7L);
+        then_the_logs_will_have_some_records_with_some_offset(page_3_of_logs, 2, 1L);
+        then_the_logs_will_have_some_records_with_some_offset(page_3_of_logs, 1, 2L);
 
         List<SourceRecord> page_4_of_logs = when_the_task_is_polled(task);
         then_the_logs_are_of_size(page_4_of_logs, 2);
+        then_the_logs_will_have_some_records_with_some_offset(page_4_of_logs, 2, 1L);
+
+    }
+
+    private void then_the_logs_will_have_some_records_with_some_offset(List<SourceRecord> page_1_of_logs, int someRecords, long someOffset) {
+        assertEquals(someRecords, page_1_of_logs.stream().filter(sourceRecord -> someOffset == (Long) sourceRecord.sourceOffset().get(LAST_API_OFFSET)).count());
     }
 
     @Test

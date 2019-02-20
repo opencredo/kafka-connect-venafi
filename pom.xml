@@ -6,7 +6,7 @@
     <artifactId>kafka-connect-venafi-tpp</artifactId>
     <version>0.9.4-SNAPSHOT</version>
     <name>kafka-connect-venafi-tpp</name>
-    <description>Kafka connector for Venafi Trust Protection Platform Security Events</description>
+    <description>Kafka connector for Venafi Security Events</description>
 
     <scm>
         <url>https://github.com/opencredo/kafka-connect-venafi-tpp.git</url>
@@ -198,15 +198,14 @@
                             <goal>kafka-connect</goal>
                         </goals>
                         <configuration>
-                            <title>Kafka Connect Venafi TPP</title>
+                            <title>Kafka Connect Venafi</title>
                             <documentationUrl>
                                 https://github.com/opencredo/kafka-connect-venafi-tpp/blob/master/README.md
                             </documentationUrl>
                             <description>
-                                This connector connects via HTTP to your instance of the Venafi Trust Protection
-                                Platform ( which shall be referred to as TPP from here on) and pulls your Log events
-                                into Kafka, allowing you to do any filtering/transforming/processing you'd like to do
-                                within a comfortable Kafka environment.
+                                This connector connects via HTTP to your instance of the Venafi Platform and pulls
+                                your Log events into Kafka, allowing you to do any filtering/transforming/processing
+                                you'd like to do within a comfortable Kafka environment.
 
                                 N.B. Currently the connector starts from the beginning of time (i.e. processes all past
                                 events first), a future release will allow the option of starting from now (i.e.
