@@ -182,6 +182,9 @@
                                     <exclude>*:xml-apis</exclude>
                                     <exclude>org.apache.maven:lib:tests</exclude>
                                     <exclude>log4j:log4j:jar:</exclude>
+                                    <exclude>io.confluent.*</exclude>
+                                    <exclude>org.apache.kafka.connect.*</exclude>
+                                    <exclude>org.apache.kafka:connect-api</exclude>
                                 </excludes>
                             </artifactSet>
                         </configuration>
