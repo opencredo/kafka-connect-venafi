@@ -5,7 +5,7 @@ kafka-connect-venafi-tpp is a [Kafka connector](http://kafka.apache.org/document
 
 | Connector Version | Source Technology Version | Confluent Platorm Version |   
 | --- | --- | --- |  
-| 0.9.3 | Venafi Trust Protection Platform 18.X | Compatible Confluent Platform Version - ≥5.0.X |  
+| 0.9.X | Venafi Trust Protection Platform 18.X | Compatible Confluent Platform Version - ≥5.0.X |  
 ---
 
 Description
