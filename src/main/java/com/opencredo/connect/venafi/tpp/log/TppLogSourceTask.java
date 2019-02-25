@@ -90,20 +90,17 @@ public class TppLogSourceTask extends SourceTask {
 
     private List<SourceRecord> getTppLogsAsSourceRecords(String token) {
 
-        long loopOffset = 0;
-
         List<EventLog> jsonLogs = getTppLogs(token, fromDate, apiOffset);
         ArrayList<SourceRecord> records = new ArrayList<>();
         for (EventLog eventLog : jsonLogs) {
 
             String newFromDate = eventLog.getClientTimestamp().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-            loopOffset = calculateLoopOffset(loopOffset, newFromDate, fromDate);
+            apiOffset = calculateApiOffset(apiOffset, newFromDate, fromDate);
             fromDate = newFromDate;
 
             log.debug(" The fromDate is now {}.", fromDate);
             records.add(buildSourceRecord(eventLog, fromDate, apiOffset));
         }
-        apiOffset = calculateApiOffset(loopOffset, jsonLogs);
 
         return records;
     }
@@ -114,18 +111,11 @@ public class TppLogSourceTask extends SourceTask {
         return new SourceRecord(sourcePartition, sourceOffset, topic, EventLog.TppLogSchema(), eventLog.toStruct());
     }
 
-    private long calculateLoopOffset(long currentLoopOffset, String newFromDate, String oldFromDate) {
+    private long calculateApiOffset(long currentLoopOffset, String newFromDate, String oldFromDate) {
         if (newFromDate.equals(oldFromDate)) {
             return ++currentLoopOffset;
         }
         return 1L;
-    }
-
-    private long calculateApiOffset(long currentLoopOffset, List<EventLog> jsonLogs) {
-        if (jsonLogs.size() == currentLoopOffset) {
-            return apiOffset + currentLoopOffset;
-        }
-        return currentLoopOffset;
     }
 
     private Map<String, Object> buildSourcePartition() {
