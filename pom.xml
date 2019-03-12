@@ -2,14 +2,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.opencredo</groupId>
-    <artifactId>kafka-connect-venafi-tpp</artifactId>
+    <artifactId>kafka-connect-venafi</artifactId>
     <version>0.9.5-SNAPSHOT</version>
-    <name>kafka-connect-venafi-tpp</name>
+    <name>kafka-connect-venafi</name>
     <description>Kafka connector for Venafi Security Events</description>
 
     <scm>
-        <url>https://github.com/opencredo/kafka-connect-venafi-tpp.git</url>
-        <developerConnection>scm:git:https://github.com/opencredo/kafka-connect-venafi-tpp.git</developerConnection>
+        <url>https://github.com/opencredo/kafka-connect-venafi.git</url>
+        <developerConnection>scm:git:https://github.com/opencredo/kafka-connect-venafi.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
     <properties>
@@ -202,7 +202,7 @@
                         <configuration>
                             <title>Kafka Connect Venafi</title>
                             <documentationUrl>
-                                https://github.com/opencredo/kafka-connect-venafi-tpp/blob/master/README.md
+                                https://github.com/opencredo/kafka-connect-venafi/blob/master/README.md
                             </documentationUrl>
                             <description>
                                 This connector connects via HTTP to your instance of the Venafi Platform and pulls
@@ -218,7 +218,7 @@
                             <supportProviderName>${connect.component.owner.username}</supportProviderName>
                             <supportSummary>OpenCredo supports the Venafi source connector on behalf of Venafi.
                             </supportSummary>
-                            <supportUrl>https://github.com/opencredo/kafka-connect-venafi-tpp</supportUrl>
+                            <supportUrl>https://github.com/opencredo/kafka-connect-venafi</supportUrl>
                             <supportLogo>logos/opencredo.png</supportLogo>
 
                             <ownerUsername>opencredo</ownerUsername>
@@ -233,7 +233,6 @@
 
                             <tags>
                                 <tag>venafi</tag>
-                                <tag>tpp</tag>
                             </tags>
 
                             <confluentControlCenterIntegration>true</confluentControlCenterIntegration>

@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class TppLogSourceConfig extends AbstractConfig {
     public static final String BASE_URL_CONFIG = "venafi.base.url";
-    private static final String BASE_URL_DOC = "URL to TPP API";
+    private static final String BASE_URL_DOC = "URL to VENAFI VEDSDK API";
 
     public static final String USERNAME_CONFIG = "venafi.username";
     private static final String USERNAME_DOC = "The username to use with the API.";
@@ -17,8 +17,8 @@ public class TppLogSourceConfig extends AbstractConfig {
     private static final String PASSWORD_DOC = "The password to use with the API.";
 
     public static final String TOPIC_CONFIG = "venafi.topic";
-    private static final String TOPIC_DEFAULT = "TPP-LOGS";
-    private static final String TOPIC_DOC = "Topic to publish TPP log data to.";
+    private static final String TOPIC_DEFAULT = "VENAFI-LOGS";
+    private static final String TOPIC_DOC = "Topic to publish VENAFI log data to.";
 
     public static final String BATCH_SIZE = "venafi.batch.size";
     private static final int BATCH_SIZE_DEFAULT = 100;

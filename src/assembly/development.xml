@@ -11,7 +11,7 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
-            <outputDirectory>share/java/kafka-connect-venafi-tpp/</outputDirectory>
+            <outputDirectory>share/java/kafka-connect-venafi/</outputDirectory>
         </dependencySet>
     </dependencySets>
 </assembly>

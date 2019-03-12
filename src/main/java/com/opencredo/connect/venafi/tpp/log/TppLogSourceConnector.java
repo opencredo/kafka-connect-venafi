@@ -23,7 +23,7 @@ public class TppLogSourceConnector extends SourceConnector {
     @Override
     public void start(Map<String, String> props) {
 
-        log.info("Starting up TPP Log Source connector");
+        log.info("Starting up VENAFI Log Source connector");
         try {
             configProperties = setupSourcePropertiesWithDefaultsIfMissing(props);
         } catch (ConfigException e) {
