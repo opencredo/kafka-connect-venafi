@@ -1,7 +1,7 @@
-# kafka-connect-venafi-tpp
-[![Build Status](https://travis-ci.com/opencredo/kafka-connect-venafi-tpp.svg?token=9Xb3AhGzVsnLVT8gQNzo&branch=master)](https://travis-ci.com/opencredo/kafka-connect-venafi-tpp)
+# kafka-connect-venafi
+[![Build Status](https://travis-ci.com/opencredo/kafka-connect-venafi.svg?token=9Xb3AhGzVsnLVT8gQNzo&branch=master)](https://travis-ci.com/opencredo/kafka-connect-venafi)
 
-kafka-connect-venafi-tpp is a [Kafka connector](http://kafka.apache.org/documentation.html#connect) for Venafi Trust Protection Platform security events.
+kafka-connect-venafi is a [Kafka connector](http://kafka.apache.org/documentation.html#connect) for Venafi Trust Protection Platform security events.
 
 | Connector Version | Source Technology Version | Confluent Platorm Version |   
 | --- | --- | --- |  
@@ -10,7 +10,7 @@ kafka-connect-venafi-tpp is a [Kafka connector](http://kafka.apache.org/document
 
 Description
 ---
-This connector connects via HTTP to your instance of the Venafi Trust Protection Platform ( which shall be referred to as TPP from here on) and pulls your Log events into Kafka, allowing you to do any filtering/transforming/processing you'd like to do within a comfortable Kafka environment.  
+This connector connects via HTTP to your instance of the Venafi and pulls your Log events into Kafka, allowing you to do any filtering/transforming/processing you'd like to do within a comfortable Kafka environment.  
  **N.B.** Currently the connector starts from the beginning of time (i.e. processes all past events first), a future release will allow the option of starting from now (i.e. skipping all previous events).
 
 ###### EventLog object produced by this source Connector as defined by the Venafi WebSDK
@@ -36,7 +36,7 @@ This connector connects via HTTP to your instance of the Venafi Trust Protection
 # Development
 To manually install the connector:
 1. Build the JAR with `mvn package`
-2. Find the JAR in your target folder called venafi-tpp-log-connector-<version you're building>-fat.jar
+2. Find the JAR in your target folder called venafi-log-connector-<version you're building>-fat.jar
 3. Create a connect property file 
 ```
 name=venafi
@@ -75,7 +75,7 @@ sudo bin/confluent log connect
 # Config Definitions explained.
 
 ``venafi.base.url``
-  URL to TPP API
+  URL to API
 
   * Type: string
   * Valid Values: non-empty string and no ISO control characters
@@ -94,7 +94,7 @@ sudo bin/confluent log connect
   * Importance: high
 
 ``venafi.topic``
-  Topic to publish TPP log data to.
+  Topic to publish Venafi log data to.
 
   * Type: string
   * Default: TPP-LOGS
