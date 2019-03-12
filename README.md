@@ -1,5 +1,5 @@
 # kafka-connect-venafi
-[![Build Status](https://travis-ci.com/opencredo/kafka-connect-venafi.svg?token=9Xb3AhGzVsnLVT8gQNzo&branch=master)](https://travis-ci.com/opencredo/kafka-connect-venafi)
+[![Build Status](https://travis-ci.com/opencredo/kafka-connect-venafi.svg?branch=master)](https://travis-ci.com/opencredo/kafka-connect-venafi)
 
 kafka-connect-venafi is a [Kafka connector](http://kafka.apache.org/documentation.html#connect) for Venafi Trust Protection Platform security events.
 
