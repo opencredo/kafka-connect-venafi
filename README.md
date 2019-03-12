@@ -48,7 +48,7 @@ venafi.password=<your_api_password>
 ```
 This is filled with the minimum values required, any default values are provided by the [config definition class](./src/main/java/com/opencredo/connect/venafi/tpp/log/TppLogSourceConfig.java). 
 This can also be looked at for more information on configuration, or look at the [wiki on the config definitions.](https://github.com/opencredo/kafka-connect-venafi-tpp/wiki/Config-Definitions-explained.)
-Make sure to replace the items with the <> brackets with what's needed to connect to your Venafi TPP/VEDSDK instance.   
+Make sure to replace the items with the <> brackets with what's needed to connect to your Venafi VEDSDK instance.   
 There is a quickstart properties file included with the code [here](./config/source-quickstart.properties) which has some dummy values for your base Url, username & password but can be used as an example.  
 4. Create a directory and place the JAR file in it, e.g. `<path-to-confluent>/share/java/kafka-connect-venafi-tpp`.  
 5. Then call: `<path-to-confluent>/bin/confluent load venafi -d venafi.properties`  
@@ -67,7 +67,7 @@ sudo bin/confluent load venafi -d ~/venafi.properties
 sudo bin/confluent status venafi
 sudo bin/kafka-topics --list --zookeeper localhost:2181
 sudo bin/kafka-console-consumer --bootstrap-server localhost:9092 --topic connect-offsets --from-beginning
-sudo bin/kafka-avro-console-consumer --bootstrap-server localhost:9092 --topic TPP-LOGS
+sudo bin/kafka-avro-console-consumer --bootstrap-server localhost:9092 --topic VENAFI-LOGS
 sudo bin/confluent log connect
 ``` 
 ---
@@ -97,7 +97,7 @@ sudo bin/confluent log connect
   Topic to publish Venafi log data to.
 
   * Type: string
-  * Default: TPP-LOGS
+  * Default: VENAFI-LOGS
   * Valid Values: non-empty string and no ISO control characters
   * Importance: high
 
