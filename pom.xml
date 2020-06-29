@@ -265,6 +265,7 @@
                             <workingDirectory>${project.basedir}</workingDirectory>
                             <arguments>
                                 <argument>rmi</argument>
+                                <argument>-f</argument>
                                 <argument>${docker.repo.user}/${docker.image.name}:${project.version}</argument>
                             </arguments>
                         </configuration>
