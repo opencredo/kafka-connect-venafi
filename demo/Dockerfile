@@ -1,6 +1,7 @@
 FROM openjdk:11
 WORKDIR /app
 COPY kafka-install/kafka_2.13-2.4.0 ./kafka
+COPY demo/connect-standalone.properties ./kafka/config/
 COPY target/kafka-connect-venafi-0.9.6-SNAPSHOT-fat.jar ./venafi-connect-demo/
 COPY config/source-quickstart.properties ./venafi-connect-demo/
 COPY demo/startup-script.sh    ./venafi-connect-demo/
