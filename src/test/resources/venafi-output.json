@@ -1,0 +1,131 @@
+{
+  "schema": {
+    "type": "struct",
+    "fields": [
+      {
+        "type": "int64",
+        "optional": false,
+        "name": "org.apache.kafka.connect.data.Timestamp",
+        "version": 1,
+        "field": "ClientTimestamp"
+      },
+      {
+        "type": "int32",
+        "optional": false,
+        "field": "Grouping"
+      },
+      {
+        "type": "int64",
+        "optional": false,
+        "field": "Id"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "Name"
+      },
+      {
+        "type": "int64",
+        "optional": false,
+        "name": "org.apache.kafka.connect.data.Timestamp",
+        "version": 1,
+        "field": "ServerTimestamp"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "Severity"
+      },
+      {
+        "type": "string",
+        "optional": false,
+        "field": "SourceIP"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "Component"
+      },
+      {
+        "type": "int32",
+        "optional": true,
+        "field": "ComponentId"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "ComponentSubsystem"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "EventId"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "Text1"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "Text2"
+      },
+      {
+        "type": "int32",
+        "optional": true,
+        "field": "Value1"
+      },
+      {
+        "type": "int32",
+        "optional": true,
+        "field": "Value2"
+      },
+      {
+        "type": "string",
+        "optional": true,
+        "field": "Data"
+      }
+    ],
+    "optional": false,
+    "name": "EventLog"
+  },
+  "payload": {
+    "ClientTimestamp": 1583743674540,
+    "Grouping": 0,
+    "Id": 917513,
+    "Name": "Venafi Platform - Venafi Trust Protection Platform Heartbeat",
+    "ServerTimestamp": 1583743675680,
+    "Severity": "Info",
+    "SourceIP": "127.0.0.1",
+    "Component": "\\VED\\Engines\\tpp",
+    "ComponentId": 11,
+    "ComponentSubsystem": "Config",
+    "EventId": null,
+    "Text1": null,
+    "Text2": null,
+    "Value1": 0,
+    "Value2": 0,
+    "Data": null
+  }
+}
+{
+  "payload": {
+    "ClientTimestamp": 1583764011797,
+    "Grouping": 0,
+    "Id": 1966081,
+    "Name": "CA Import - Foreman Heartbeat",
+    "ServerTimestamp": 1583764012767,
+    "Severity": "Info",
+    "SourceIP": "127.0.0.1",
+    "Component": "\\VED\\Engines\\tpp",
+    "ComponentId": 11,
+    "ComponentSubsystem": "Config",
+    "EventId": null,
+    "Text1": null,
+    "Text2": null,
+    "Value1": 0,
+    "Value2": 0,
+    "Data": null
+  }
+}

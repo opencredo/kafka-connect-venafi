@@ -1,0 +1,246 @@
+version: '3.8'
+services:
+  venafi-zookeeper:
+    image: confluentinc/cp-zookeeper:5.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - 2181:2181
+  venafi-kafka:
+    image: confluentinc/cp-kafka:5.5.0
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "venafi-zookeeper:2181"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:29092"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - 8092:8092
+    depends_on:
+      - venafi-zookeeper
+  venafi-connector:
+    image: confluentinc/cp-kafka-connect:5.5.0
+#    entrypoint: ["tail -f /dev/null "]
+    environment:
+       CUB_CLASSPATH: '/etc/confluent/docker/docker-utils.jar:/usr/share/java/confluent-security/connect/*:/usr/share/java/kafka/*'
+       CONNECT_BOOTSTRAP_SERVERS: "venafi-kafka:8092"
+       CONNECT_GROUP_ID: "connect-cluster"
+
+       CONNECT_REST_PORT: 8083
+       CONNECT_LISTENERS: https://0.0.0.0:8083
+       CONNECT_PRODUCER_CLIENT_ID: "connect-worker-producer"
+       CONNECT_PRODUCER_ENABLE_IDEMPOTENCE: 'true'
+
+       CONNECT_CONFIG_STORAGE_TOPIC: connect-configs
+       CONNECT_OFFSET_STORAGE_TOPIC: connect-offsets
+       CONNECT_STATUS_STORAGE_TOPIC: connect-statuses
+
+       CONNECT_REPLICATION_FACTOR: 2
+       CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 2
+       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 2
+       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 2
+
+       CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+       CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+       CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+       CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+
+       CONNECT_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
+       CONNECT_REST_ADVERTISED_HOST_NAME: connect
+       CONNECT_PLUGIN_PATH: "/usr/share/java,/connect-plugins,/usr/share/confluent-hub-components"
+       CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+       CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+
+# TODO: check this classpath by running the container up without the starting script and log into it docker exec it or something
+       CLASSPATH: "/usr/share/confluent-hub-components/confluentinc-kafka-connect-replicator/lib/replicator-rest-extension-${CONNECTOR_VERSION}.jar:/usr/share/java/monitoring-interceptors/monitoring-interceptors-${CONFLUENT}.jar"
+
+
+
+#      # Connect Worker
+#       CONNECT_SECURITY_PROTOCOL: SASL_SSL
+#       CONNECT_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.truststore.jks
+#       CONNECT_SSL_TRUSTSTORE_PASSWORD: confluent
+#       CONNECT_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.keystore.jks
+#       CONNECT_SSL_KEYSTORE_PASSWORD: confluent
+#       CONNECT_SSL_KEY_PASSWORD: confluent
+#
+#      # Connect Producer
+#       CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
+#       CONNECT_PRODUCER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.truststore.jks
+#       CONNECT_PRODUCER_SSL_TRUSTSTORE_PASSWORD: confluent
+#       CONNECT_PRODUCER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.keystore.jks
+#       CONNECT_PRODUCER_SSL_KEYSTORE_PASSWORD: confluent
+#       CONNECT_PRODUCER_SSL_KEY_PASSWORD: confluent
+#       CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+#       CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: SASL_SSL
+#       CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.truststore.jks
+#       CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SSL_TRUSTSTORE_PASSWORD: confluent
+#       CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.keystore.jks
+#       CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SSL_KEYSTORE_PASSWORD: confluent
+#       CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SSL_KEY_PASSWORD: confluent
+#
+#      # Connect Consumer
+#       CONNECT_CONSUMER_SECURITY_PROTOCOL: SASL_SSL
+#       CONNECT_CONSUMER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.truststore.jks
+#       CONNECT_CONSUMER_SSL_TRUSTSTORE_PASSWORD: confluent
+#       CONNECT_CONSUMER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.keystore.jks
+#       CONNECT_CONSUMER_SSL_KEYSTORE_PASSWORD: confluent
+#       CONNECT_CONSUMER_SSL_KEY_PASSWORD: confluent
+#       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+#       CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: SASL_SSL
+#       CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.truststore.jks
+#       CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SSL_TRUSTSTORE_PASSWORD: confluent
+#       CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.keystore.jks
+#       CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SSL_KEYSTORE_PASSWORD: confluent
+#       CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SSL_KEY_PASSWORD: confluent
+#
+#      # RBAC
+#       CONNECT_SASL_MECHANISM: 'OAUTHBEARER'
+#       CONNECT_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+#       CONNECT_SASL_JAAS_CONFIG: |
+#         org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+#         username="connectAdmin" \
+#         password="connectAdmin" \
+#         metadataServerUrls="http://kafka1:8091,http://kafka2:8092";
+#      # Allow overriding configs on the connector level
+#       CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY: 'All'
+#
+#      # Producer
+#       CONNECT_PRODUCER_SASL_MECHANISM: 'OAUTHBEARER'
+#       CONNECT_PRODUCER_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+#       CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: 'OAUTHBEARER'
+#       CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+#       CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: |
+#         org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+#         username="connectAdmin" \
+#         password="connectAdmin" \
+#         metadataServerUrls="http://kafka1:8091,http://kafka2:8092";
+#      # Consumer
+#       CONNECT_CONSUMER_SASL_MECHANISM: 'OAUTHBEARER'
+#       CONNECT_CONSUMER_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+#       CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: 'OAUTHBEARER'
+#       CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+#       CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: |
+#         org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+#         username="connectAdmin" \
+#         password="connectAdmin" \
+#         metadataServerUrls="http://kafka1:8091,http://kafka2:8092";
+#      # Default admin config
+#       CONNECT_ADMIN_SECURITY_PROTOCOL: SASL_SSL
+#       CONNECT_ADMIN_SASL_MECHANISM: 'OAUTHBEARER'
+#       CONNECT_ADMIN_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+#       CONNECT_ADMIN_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.truststore.jks
+#       CONNECT_ADMIN_SSL_TRUSTSTORE_PASSWORD: confluent
+#       CONNECT_ADMIN_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.keystore.jks
+#       CONNECT_ADMIN_SSL_KEYSTORE_PASSWORD: confluent
+#       CONNECT_ADMIN_SSL_KEY_PASSWORD: confluent
+#
+#      # io.confluent.connect.replicator.monitoring.ReplicatorMonitoringExtension - Confluent Replicator
+#      # io.confluent.connect.security.ConnectSecurityExtension - RBAC
+#      # io.confluent.connect.secretregistry.ConnectSecretRegistryExtension - Secret Registry
+#       CONNECT_REST_EXTENSION_CLASSES: io.confluent.connect.replicator.monitoring.ReplicatorMonitoringExtension,io.confluent.connect.security.ConnectSecurityExtension,io.confluent.connect.secretregistry.ConnectSecretRegistryExtension
+#       CONNECT_REST_SERVLET_INITIALIZOR_CLASSES: 'io.confluent.common.security.jetty.initializer.InstallBearerOrBasicSecurityHandler'
+#       CONNECT_PUBLIC_KEY_PATH: /tmp/conf/public.pem
+#
+#      # Used by Connect's REST layer to connect to MDS to verify tokens and authenticate clients
+#       CONNECT_CONFLUENT_METADATA_BOOTSTRAP_SERVER_URLS: http://kafka1:8091,http://kafka2:8092
+#       CONNECT_CONFLUENT_METADATA_BASIC_AUTH_USER_INFO: 'connectAdmin:connectAdmin'
+#       CONNECT_CONFLUENT_METADATA_HTTP_AUTH_CREDENTIALS_PROVIDER: 'BASIC'
+#
+#      # Secret Registry
+#       CONNECT_CONFIG_PROVIDERS: 'secret'
+#       CONNECT_CONFIG_PROVIDERS_SECRET_CLASS: 'io.confluent.connect.secretregistry.rbac.config.provider.InternalSecretConfigProvider'
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_MASTER_ENCRYPTION_KEY: 'password1234'
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_BOOTSTRAP_SERVERS: kafka1:10091,kafka2:10092
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SECURITY_PROTOCOL: SASL_SSL
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.truststore.jks
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SSL_TRUSTSTORE_PASSWORD: confluent
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/kafka.connect.keystore.jks
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SSL_KEYSTORE_PASSWORD: confluent
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SSL_KEY_PASSWORD: confluent
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SASL_MECHANISM: 'OAUTHBEARER'
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SASL_LOGIN_CALLBACK_HANDLER_CLASS: 'io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler'
+#       CONNECT_CONFIG_PROVIDERS_SECRET_PARAM_KAFKASTORE_SASL_JAAS_CONFIG: |
+#         org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+#         username="connectAdmin" \
+#         password="connectAdmin" \
+#         metadataServerUrls="http://kafka1:8091,http://kafka2:8092";
+#      # KAFKA_OPTS required for ReplicatorMonitoringExtension
+#       KAFKA_OPTS: -Djavax.net.ssl.trustStore=/etc/kafka/secrets/kafka.connect.truststore.jks
+#         -Djavax.net.ssl.trustStorePassword=confluent
+#         -Djavax.net.ssl.keyStore=/etc/kafka/secrets/kafka.connect.keystore.jks
+#         -Djavax.net.ssl.keyStorePassword=confluent
+#       CONNECT_SSL_CIPHER_SUITES: "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256"
+#
+#      # Reduce Connect memory utilization
+#       KAFKA_JVM_PERFORMANCE_OPTS: -server -XX:+UseG1GC -XX:GCTimeRatio=1
+#         -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20
+#         -XX:MaxGCPauseMillis=10000 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ExplicitGCInvokesConcurrent
+#         -XX:MaxInlineLevel=15 -Djava.awt.headless=true
+
+
+
+    depends_on:
+      - venafi-kafka
+
+
+
+#services:
+#  zoo1:
+#    build:
+#      context: .
+#      dockerfile: ./Dockerfile
+#      args:
+#        hostname: zoo1
+#    ports:
+#      - 2181:2181
+#      - 9092:9092
+#    expose:
+#      - 2181
+#      - 9092
+#  zoo2:
+#    build:
+#      context: .
+#      dockerfile: ./Dockerfile
+#      args:
+#        hostname: zoo2
+#    ports:
+#      - 2181:2182
+#      - 9092:9093
+#    expose:
+#      - 2182
+#      - 9093
+#  zoo3:
+#    build:
+#      context: .
+#      dockerfile: ./Dockerfile
+#      args:
+#        hostname: zoo2
+#    ports:
+#      - 2181:2183
+#      - 9092:9094
+#    expose:
+#      - 2183
+#      - 9094
+
+
+#  dynamodb:
+#    image: amazon/dynamodb-local
+#    ports:
+#      - 8000:8000
+#  create_tables:
+#    build:
+#      context: ./scripts
+#      dockerfile: ../Dockerfile-awscli
+#    depends_on:
+#      - dynamodb
+#    volumes:
+#    - ./scripts/local-dynamodb-init.sh:/usr/local/bin/local-dynamodb-init.sh
+#    - ${HOME}:${HOME}
+#    environment:
+#      AWS_SDK_LOAD_CONFIG: ${AWS_SDK_LOAD_CONFIG} # Need to pass in the same credentials through to dynamodb-local as tables are partitioned based on those
+#      AWS_CONFIG_FILE: ${AWS_CONFIG_FILE}
+#      AWS_PROFILE: ${AWS_PROFILE}
+#      AWS_SHARED_CREDENTIALS_FILE: ${AWS_SHARED_CREDENTIALS_FILE}
+#    entrypoint: /usr/local/bin/local-dynamodb-init.sh
+#    command:
+#      - http://dynamodb:8000
