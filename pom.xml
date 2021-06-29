@@ -29,6 +29,15 @@
         <docker.image.name>venafi-kafka-connector-demo</docker.image.name>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>ignored.repo</id>
+            <name>Ignored Repository</name>
+            <url>Ignored Repository</url>
+            <!--   mvn -Dmaven.deploy.skip=true deploy   -->
+        </repository>
+    </distributionManagement>
+
     <licenses>
         <license>
             <name>Apache License 2.0</name>
@@ -293,10 +302,12 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <!-- Push the image to a docker repo. -->
+                    <!-- Push the image to a docker repo.
+                         mvn -Dmaven.deploy.skip=true deploy
+                         if you wish to deploy the docker image but not deploy the jars -->
                     <execution>
                         <id>docker-push</id>
-                        <phase>install</phase>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>

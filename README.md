@@ -61,15 +61,53 @@ If you intend to change the JAR please stop, change the JAR, then start the clus
 
 # Useful commands while developing
 ```
+(v5.2.3 and lower)
 sudo bin/confluent start  
 sudo bin/confluent status
-sudo bin/confluent load venafi -d ~/venafi.properties
+sudo bin/confluent load venafi -d ~/venafi.properties 
 sudo bin/confluent status venafi
+
 sudo bin/kafka-topics --list --zookeeper localhost:2181
 sudo bin/kafka-console-consumer --bootstrap-server localhost:9092 --topic connect-offsets --from-beginning
 sudo bin/kafka-avro-console-consumer --bootstrap-server localhost:9092 --topic VENAFI-LOGS
 sudo bin/confluent log connect
 ``` 
+
+# Installing on Vanilla Kafka
+1. Prepare the venafi-log-connector-<version you're building>-fat.jar using `mvn package`
+2. locate your connect-quickstart.properties in your kafka installation, add the following line:
+   `plugin.path=/path/to/target/kafka-connect-venafi-0.9.6-SNAPSHOT-fat.jar`
+   note: while developing, it is also possible to point the `plugin.path` to your build directory
+3. Start the Kafka connect process:
+   `% $KAFKA_HOME/bin/connect-standalone.sh $KAFKA_HOME/config/connect-standalone.properties config/source-quickstart.properties`
+   note: the `source-quickstart.properties` should be edited to contain your connection details.
+  
+  
+  
+You'll want to start the following in order:
+1. Zookeeper:
+kafka-connect-venafi/kafka-install/kafka_2.13-2.4.0/bin % ./zookeeper-server-start.sh ../config/zookeeper.properties
+2. Kafka server:
+kafka-connect-venafi/kafka-install/kafka_2.13-2.4.0/bin % ./kafka-server-start.sh ../config/server.properties
+3. Kafka connect:
+kafka-connect-venafi % kafka-install/kafka_2.13-2.4.0/bin/connect-standalone.sh kafka-install/kafka_2.13-2.4.0/config/connect-standalone.properties config/source-quickstart.properties
+
+^^ this property file is attached, and is an edited version of the main github source tree for the connector property file with the credentials for the cloudshare VM given to me by Venafi
+
+4. Kafka console consumer (to see the messages):
+kafka-connect-venafi/kafka-install/kafka_2.13-2.4.0/bin % ./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic VENAFI-LOGS
+
+   
+docker tag local-image:tagname new-repo:tagname
+docker push new-repo:tagname
+
+
+% docker tag venafi-kafka-connector-demo jbowkett/techwob-docker-images:0.9.5-docker-demo
+% docker push jbowkett/techwob-docker-images:0.9.5-docker-demo
+
+docker tag local-image:tagname jbowkett/techwob-docker-images:tagname
+docker push jbowkett/techwob-docker-images:tagname
+
 ---
 
 # Config Definitions explained.
