@@ -109,7 +109,19 @@ docker tag local-image:tagname jbowkett/techwob-docker-images:tagname
 docker push jbowkett/techwob-docker-images:tagname
 
 ---
+# Integration Test
 
+If you want to run the integration test as a maven stage
+1. Prepare the venafi-log-connector<version you're building>-fat.jar using `mvn package`
+2. Run integration test by using `mvn verify`.This will spin up docker containers as defined in the integration/docker-compose.yaml file; Venafi's Connector configuration is also in the same folder, it connects to a mocked service.
+
+You can also use the same docker-compose configuration to connect the Venafi Connector to the real service:
+1. Run `mvn package` to generate the jar.
+2. Update connection details (base.url, username, password) on `integration/venafi-source-connector.properties` 
+3. Run `docker-compose -f integration/docker-compose.yml up [-d]`
+4. Run `docker exec -it <your kafka container name> /opt/kafka/bin/kafka-console-consumer.sh --bootstrap-server <your kafka container name>:9092 --topic VENAFI-LOGS --from-beginning` to verify that the EventLogs are written to kafka
+
+---
 # Config Definitions explained.
 
 ``venafi.base.url``
