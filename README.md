@@ -91,23 +91,7 @@ kafka-connect-venafi/kafka-install/kafka_2.13-2.4.0/bin % ./zookeeper-server-sta
 kafka-connect-venafi/kafka-install/kafka_2.13-2.4.0/bin % ./kafka-server-start.sh ../config/server.properties
 3. Kafka connect:
 kafka-connect-venafi % kafka-install/kafka_2.13-2.4.0/bin/connect-standalone.sh kafka-install/kafka_2.13-2.4.0/config/connect-standalone.properties config/source-quickstart.properties
-
-^^ this property file is attached, and is an edited version of the main github source tree for the connector property file with the credentials for the cloudshare VM given to me by Venafi
-
-4. Kafka console consumer (to see the messages):
-kafka-connect-venafi/kafka-install/kafka_2.13-2.4.0/bin % ./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic VENAFI-LOGS
-
    
-docker tag local-image:tagname new-repo:tagname
-docker push new-repo:tagname
-
-
-% docker tag venafi-kafka-connector-demo jbowkett/techwob-docker-images:0.9.5-docker-demo
-% docker push jbowkett/techwob-docker-images:0.9.5-docker-demo
-
-docker tag local-image:tagname jbowkett/techwob-docker-images:tagname
-docker push jbowkett/techwob-docker-images:tagname
-
 ---
 # Integration Test
 
