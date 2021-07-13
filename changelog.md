@@ -1,5 +1,5 @@
 
-0.9.6
+20.4 Release
 ---
 Ensured test and module compatibility with Open JDK 11
 Ensure compatibility with Venafi platform 20.4
@@ -8,7 +8,6 @@ Minor Logging updates
 
 Coming soon:
 Ensured passwords are held private in Kafka logging
-Move to version 1.0?
 Ensure compatibility with latest Confluent Kafka
 
 

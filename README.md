@@ -5,7 +5,8 @@ kafka-connect-venafi is a [Kafka connector](http://kafka.apache.org/documentatio
 
 | Connector Version | Source Technology Version | Confluent Platorm Version |   
 | --- | --- | --- |  
-| 0.9.X | Venafi Trust Protection Platform 18.X | Compatible Confluent Platform Version - ≥5.0.X |  
+| 0.9.X | Venafi Trust Protection Platform 18.X | Compatible Confluent Platform Version - ≥5.0.X | 
+| 20.4  | Venafi Trust Protection Platform 20.4 | Compatible Confluent Platform Version - ≥5.0.X | 
 ---
 
 Description

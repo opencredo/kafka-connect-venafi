@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.opencredo</groupId>
     <artifactId>kafka-connect-venafi</artifactId>
-    <version>0.9.6-SNAPSHOT</version>
+    <version>20.4</version>
     <name>kafka-connect-venafi</name>
     <description>Kafka connector for Venafi Security Events</description>
 
