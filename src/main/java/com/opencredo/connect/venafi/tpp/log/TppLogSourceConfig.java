@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TppLogSourceConfig extends AbstractConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(TppLogSourceConfig.class);
+
     public static final String BASE_URL_CONFIG = "venafi.base.url";
     private static final String BASE_URL_DOC = "URL to VENAFI VEDSDK API";
 
@@ -17,6 +20,13 @@ public class TppLogSourceConfig extends AbstractConfig {
 
     public static final String PASSWORD_CONFIG = "venafi.password";
     private static final String PASSWORD_DOC = "The password to use with the API.";
+
+    public static final String SCOPE_CONFIG = "venafi.scope";
+    public static final String SCOPE_DEFAULT = "any";
+    private static final String SCOPE_DOC = "The scope to use with the API.";
+
+    public static final String CLIENT_ID_CONFIG = "venafi.client_id";
+    private static final String CLIENT_ID_DOC = "The Application ID to use with the API.";
 
     public static final String TOPIC_CONFIG = "venafi.topic";
     private static final String TOPIC_DEFAULT = "VENAFI-LOGS";
@@ -29,7 +39,6 @@ public class TppLogSourceConfig extends AbstractConfig {
     public static final String POLL_INTERVAL = "venafi.poll.interval";
     private static final int POLL_INTERVAL_DEFAULT = 1000;
     private static final String POLL_INTERVAL_DOC = "Poll interval in milliseconds.";
-    private static final Logger log = LoggerFactory.getLogger(TppLogSourceConfig.class);
 
     public static final int MAX_BATCH_SIZE = 10_000;
     public static final int MIN_BATCH_SIZE = 2;
@@ -39,7 +48,9 @@ public class TppLogSourceConfig extends AbstractConfig {
             .define(BATCH_SIZE, ConfigDef.Type.INT, BATCH_SIZE_DEFAULT, ConfigDef.Range.between(MIN_BATCH_SIZE, MAX_BATCH_SIZE), ConfigDef.Importance.LOW, BATCH_SIZE_DOC)
             .define(POLL_INTERVAL, ConfigDef.Type.INT, POLL_INTERVAL_DEFAULT, ConfigDef.Importance.LOW, POLL_INTERVAL_DOC)
             .define(USERNAME_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, USERNAME_DOC)
-            .define(PASSWORD_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, PASSWORD_DOC);
+            .define(PASSWORD_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, PASSWORD_DOC)
+            .define(SCOPE_CONFIG, ConfigDef.Type.STRING, SCOPE_DEFAULT, ConfigDef.Importance.MEDIUM, SCOPE_DOC)
+            .define(CLIENT_ID_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, CLIENT_ID_DOC);
 
     public TppLogSourceConfig(Map<String, ?> props) {
         super(CONFIG_DEF, props);

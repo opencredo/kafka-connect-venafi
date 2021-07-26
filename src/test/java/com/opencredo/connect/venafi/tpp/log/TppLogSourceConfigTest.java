@@ -42,6 +42,7 @@ class TppLogSourceConfigTest {
         props.put(BASE_URL_CONFIG, "https://localhost:443");
         props.put(USERNAME_CONFIG, "placeholder_username");
         props.put(PASSWORD_CONFIG, "placeholder_password");
+        props.put(CLIENT_ID_CONFIG, "venafi-kafka-connect-logs-test");
         return props;
     }
 
@@ -72,6 +73,14 @@ class TppLogSourceConfigTest {
         assertEquals(noDefaultValueFor(USERNAME_CONFIG), exception.getMessage());
     }
 
+    @Test
+    void as_a_config_I_should_throw_a_config_exception_if_client_id_is_not_set() {
+        Map<String, Object> props = given_a_minimum_list_of_properties();
+        given_this_is_removed_from(CLIENT_ID_CONFIG, props);
+        Executable executingConfig = given_a_config_with(props);
+        ConfigException exception = then_I_expect_a_config_exception_when_I_run_this(executingConfig);
+        assertEquals(noDefaultValueFor(CLIENT_ID_CONFIG), exception.getMessage());
+    }
 
     @Test
     void as_a_config_I_should_throw_a_config_exception_if_base_URL_is_invalid() {

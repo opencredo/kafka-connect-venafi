@@ -71,7 +71,9 @@ public class TppLogSourceTask extends SourceTask {
 
         String username = props.get(USERNAME_CONFIG);
         String password = props.get(PASSWORD_CONFIG);
-        tokenClient = new TokenClient(username, password);
+        String scope = props.get(SCOPE_CONFIG);
+        String clientId = props.get(CLIENT_ID_CONFIG);
+        tokenClient = new TokenClient(username, password, scope, clientId);
     }
 
     @Override

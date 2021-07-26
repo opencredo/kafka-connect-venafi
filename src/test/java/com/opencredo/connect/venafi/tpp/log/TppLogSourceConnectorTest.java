@@ -133,8 +133,7 @@ class TppLogSourceConnectorTest {
         props.put(TppLogSourceConfig.BASE_URL_CONFIG, wireMockServer.baseUrl());
         props.put(TppLogSourceConfig.USERNAME_CONFIG, "placeholder_username");
         props.put(TppLogSourceConfig.PASSWORD_CONFIG, "placeholder_password");
-
-
+        props.put(TppLogSourceConfig.CLIENT_ID_CONFIG, "venafi-kafka-connect-logs-test");
         when_the_source_is_started_with_properties(source, props);
     }
 
@@ -149,12 +148,16 @@ class TppLogSourceConnectorTest {
     private void given_the_mock_will_respond_to_auth() {
         wireMockServer.stubFor(post(urlPathMatching(AUTHORIZE_API_REGEX_PATH))
                 .withRequestBody(equalToJson("{\n" +
-                        "\t\"Username\":\"placeholder_username\",\n" +
-                        "\t\"Password\":\"placeholder_password\"\n" +
+                        "\t\"username\":\"placeholder_username\",\n" +
+                        "\t\"password\":\"placeholder_password\",\n" +
+                        "\t\"client_id\":\"venafi-kafka-connect-logs-test\",\n" +
+                        "\t\"scope\":\"any\"\n" +
                         "}")).withHeader("Content-Type", containing("application/json"))
                 .willReturn(okJson("{\n" +
-                        "    \"APIKey\": \"{{randomValue type='UUID'}}\",\n" +
-                        "    \"ValidUntil\": \"/Date(" + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + "000)/\"\n" +
+                        "    \"token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"expires\": \"/Date(" + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + "000)/\",\n" +
+                        "    \"refresh_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"refresh_until\": \"/Date(" + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "000)/\"\n" +
                         "}").withTransformers("response-template")
                 ));
     }
