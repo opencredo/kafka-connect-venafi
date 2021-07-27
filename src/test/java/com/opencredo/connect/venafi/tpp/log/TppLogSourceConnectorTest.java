@@ -155,10 +155,10 @@ class TppLogSourceConnectorTest {
                         "\t\"scope\":\"any\"\n" +
                         "}")).withHeader("Content-Type", containing("application/json"))
                 .willReturn(okJson("{\n" +
-                        "    \"token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
-                        "    \"expires\": \"/Date(" + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + "000)/\",\n" +
+                        "    \"access_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"expires\": " + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + ",\n" +
                         "    \"refresh_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
-                        "    \"refresh_until\": \"/Date(" + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "000)/\"\n" +
+                        "    \"refresh_until\": " + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "\n" +
                         "}").withTransformers("response-template")
                 ));
     }

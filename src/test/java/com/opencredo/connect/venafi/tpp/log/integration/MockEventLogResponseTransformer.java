@@ -33,7 +33,7 @@ class MockEventLogResponseTransformer extends ResponseTemplateTransformer {
     private static List<List<EventLog>> partitions;
 
     private static final Gson gson = new GsonBuilder()
-            .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeConverter())
+            .registerTypeAdapter(ZonedDateTime.class, new EpochMilliConverter())
             .create();
 
     private static final AtomicInteger requestNumber = new AtomicInteger(0);

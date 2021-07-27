@@ -3,13 +3,13 @@ package com.opencredo.connect.venafi.tpp.log.model;
 import java.time.ZonedDateTime;
 
 public class TppToken {
-    private String token;
+    private String access_token;
     private ZonedDateTime expires;
     private String refresh_token;
     private ZonedDateTime refresh_until;
 
-    public String getToken() {
-        return token;
+    public String getAccessToken() {
+        return access_token;
     }
 
     public ZonedDateTime getExpires() {

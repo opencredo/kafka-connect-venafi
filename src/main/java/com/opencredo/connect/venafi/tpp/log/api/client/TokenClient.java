@@ -1,9 +1,8 @@
 package com.opencredo.connect.venafi.tpp.log.api.client;
 
 import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.opencredo.connect.venafi.tpp.log.Deserializer.DotNetDateDeserializer;
+import com.opencredo.connect.venafi.tpp.log.Deserializer.EpochSecondsDeserializer;
 import com.opencredo.connect.venafi.tpp.log.api.TppPlatformAuthorization;
 import com.opencredo.connect.venafi.tpp.log.model.Credentials;
 import com.opencredo.connect.venafi.tpp.log.model.TppRefreshToken;
@@ -38,14 +37,7 @@ public class TokenClient {
         return new GsonDecoder(
                 new GsonBuilder()
                         .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                        .registerTypeAdapter(ZonedDateTime.class, new DotNetDateDeserializer())
-                        .create());
-    }
-
-    private static GsonEncoder customEncoder() {
-        return new GsonEncoder(
-                new GsonBuilder()
-                        .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                        .registerTypeAdapter(ZonedDateTime.class, new EpochSecondsDeserializer())
                         .create());
     }
 
@@ -66,7 +58,7 @@ public class TokenClient {
                 token = tppAuth.getToken(credentials);
             }
 
-            tokenValue = token.getToken();
+            tokenValue = token.getAccessToken();
             tokenExpiry = token.getExpires();
             tokenRefreshUntil = token.getRefresh_until();
             tppRefreshToken = new TppRefreshToken(token.getRefresh_token(), clientId);

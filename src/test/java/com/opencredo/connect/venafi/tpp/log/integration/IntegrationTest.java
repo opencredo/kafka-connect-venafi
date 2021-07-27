@@ -65,7 +65,6 @@ public class IntegrationTest {
         List<String> receivedLogs = new ArrayList<>();
         while(true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
-
             for (ConsumerRecord<String,String> record : records) {
                 receivedLogs.add(record.value());
             }
@@ -89,10 +88,10 @@ public class IntegrationTest {
                         "\t\"scope\":\"any\"\n" +
                         "}")).withHeader("Content-Type", containing("application/json"))
                 .willReturn(okJson("{\n" +
-                        "    \"token\": \"{{randomValue length=15 type='ALPHANUMERIC'}}\",\n" +
-                        "    \"expires\": \"/Date(" + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + "000)/\",\n" +
-                        "    \"refresh_token\": \"{{randomValue length=15 type='ALPHANUMERIC'}}\",\n" +
-                        "    \"refresh_until\": \"/Date(" + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "000)/\"\n" +
+                        "    \"access_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"expires\": " + LocalDateTime.now().minusMinutes(3).toEpochSecond(ZoneOffset.UTC) + ",\n" +
+                        "    \"refresh_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"refresh_until\": " + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "\n" +
                         "}").withTransformers("response-template")
                 ));
     }
@@ -101,13 +100,13 @@ public class IntegrationTest {
         wireMockServer.stubFor(post(urlPathMatching(AUTHORIZE_REFRESH_API_REGEX_PATH))
                 .withRequestBody(equalToJson("{\n" +
                         "\t'refresh_token':'${json-unit.any-string}',\n" +
-                        "\t'client_id':'venafi-kafka-connect-logs-test'\n" +
+                        "\t'client_id':'kafka-connect-logs-test'\n" +
                         "}")).withHeader("Content-Type", containing("application/json"))
                 .willReturn(okJson("{\n" +
-                        "    \"token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
-                        "    \"expires\": \"/Date(" + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + "000)/\",\n" +
+                        "    \"access_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"expires\": " + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + ",\n" +
                         "    \"refresh_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
-                        "    \"refresh_until\": \"/Date(" + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "000)/\"\n" +
+                        "    \"refresh_until\": " + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "\n" +
                         "}").withTransformers("response-template")
                 ));
     }
