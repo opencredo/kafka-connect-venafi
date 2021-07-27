@@ -22,7 +22,6 @@ public class TppLogSourceConfig extends AbstractConfig {
     private static final String PASSWORD_DOC = "The password to use with the API.";
 
     public static final String SCOPE_CONFIG = "venafi.scope";
-    public static final String SCOPE_DEFAULT = "any";
     private static final String SCOPE_DOC = "The scope to use with the API.";
 
     public static final String CLIENT_ID_CONFIG = "venafi.client_id";
@@ -49,7 +48,7 @@ public class TppLogSourceConfig extends AbstractConfig {
             .define(POLL_INTERVAL, ConfigDef.Type.INT, POLL_INTERVAL_DEFAULT, ConfigDef.Importance.LOW, POLL_INTERVAL_DOC)
             .define(USERNAME_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, USERNAME_DOC)
             .define(PASSWORD_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, PASSWORD_DOC)
-            .define(SCOPE_CONFIG, ConfigDef.Type.STRING, SCOPE_DEFAULT, ConfigDef.Importance.MEDIUM, SCOPE_DOC)
+            .define(SCOPE_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.MEDIUM, SCOPE_DOC)
             .define(CLIENT_ID_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, CLIENT_ID_DOC);
 
     public TppLogSourceConfig(Map<String, ?> props) {

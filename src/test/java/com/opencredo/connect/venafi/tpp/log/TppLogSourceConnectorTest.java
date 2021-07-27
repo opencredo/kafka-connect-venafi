@@ -134,6 +134,7 @@ class TppLogSourceConnectorTest {
         props.put(TppLogSourceConfig.USERNAME_CONFIG, "placeholder_username");
         props.put(TppLogSourceConfig.PASSWORD_CONFIG, "placeholder_password");
         props.put(TppLogSourceConfig.CLIENT_ID_CONFIG, "venafi-kafka-connect-logs-test");
+        props.put(TppLogSourceConfig.SCOPE_CONFIG, "any");
         when_the_source_is_started_with_properties(source, props);
     }
 
