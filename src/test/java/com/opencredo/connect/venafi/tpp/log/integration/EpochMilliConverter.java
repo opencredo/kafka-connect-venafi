@@ -10,11 +10,9 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
-/**
- * Gson converter for ZonedDateTime
- */
-class ZonedDateTimeConverter implements JsonSerializer<ZonedDateTime>, JsonDeserializer<ZonedDateTime> {
-    private static final Logger log = LoggerFactory.getLogger(ZonedDateTimeDeserializer.class);
+class EpochMilliConverter implements JsonSerializer<ZonedDateTime>, JsonDeserializer<ZonedDateTime> {
+
+    private static final Logger log = LoggerFactory.getLogger(EpochMilliConverter.class);
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 

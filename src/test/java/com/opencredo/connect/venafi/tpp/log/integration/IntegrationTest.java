@@ -26,7 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class IntegrationTest {
 
     public static final String LOG_API_REGEX_PATH = "/vedsdk/[Ll]og/?";
-    public static final String AUTHORIZE_API_REGEX_PATH = "/vedsdk/[Aa]uthorize/?";
+    public static final String AUTHORIZE_API_REGEX_PATH = "/vedauth/[Aa]uthorize/?";
+    public static final String AUTHORIZE_REFRESH_API_REGEX_PATH = "/vedauth/[Aa]uthorize/token?";
 
     private static final String DEFAULT_TOPIC = "VENAFI-LOGS";
 
@@ -54,17 +55,16 @@ public class IntegrationTest {
     }
 
     @Test
-    void ensureAMessagePlacedOnTheStubEndpointIsReceivedByKafka() throws InterruptedException {
-        //create a stub endpoint for Venafi
-        stub_for_venafi_auth();
-        stub_for_venafi_logs();
+    void ensureAMessagePlacedOnTheStubEndpointIsReceivedByKafka() {
+        given_the_mock_will_respond_to_auth();
+        and_given_the_mock_will_respond_to_auth_refresh();
+        then_the_tasks_can_be_polled();
 
         Consumer<String,String> consumer = createConsumer("localhost:9092");
 
         List<String> receivedLogs = new ArrayList<>();
         while(true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
-
             for (ConsumerRecord<String,String> record : records) {
                 receivedLogs.add(record.value());
             }
@@ -79,20 +79,39 @@ public class IntegrationTest {
         assertEquals(3200, receivedLogs.size());
     }
 
-    private void stub_for_venafi_auth() {
+    private void given_the_mock_will_respond_to_auth() {
         wireMockServer.stubFor(post(urlPathMatching(AUTHORIZE_API_REGEX_PATH))
                 .withRequestBody(equalToJson("{\n" +
-                        "\t\"Username\":\"tppadmin\",\n" +
-                        "\t\"Password\":\"Password123!\"\n" +
+                        "\t\"username\":\"tppadmin\",\n" +
+                        "\t\"password\":\"Password123!\",\n" +
+                        "\t\"client_id\":\"kafka-connect-logs-test\",\n" +
+                        "\t\"scope\":\"any\"\n" +
                         "}")).withHeader("Content-Type", containing("application/json"))
                 .willReturn(okJson("{\n" +
-                        "    \"APIKey\": \"{{randomValue type='UUID'}}\",\n" +
-                        "    \"ValidUntil\": \"/Date(" + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + "000)/\"\n" +
+                        "    \"access_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"expires\": " + LocalDateTime.now().minusMinutes(3).toEpochSecond(ZoneOffset.UTC) + ",\n" +
+                        "    \"refresh_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"refresh_until\": " + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "\n" +
                         "}").withTransformers("response-template")
                 ));
     }
 
-    private void stub_for_venafi_logs() {
+    private void and_given_the_mock_will_respond_to_auth_refresh() {
+        wireMockServer.stubFor(post(urlPathMatching(AUTHORIZE_REFRESH_API_REGEX_PATH))
+                .withRequestBody(equalToJson("{\n" +
+                        "\t'refresh_token':'${json-unit.any-string}',\n" +
+                        "\t'client_id':'kafka-connect-logs-test'\n" +
+                        "}")).withHeader("Content-Type", containing("application/json"))
+                .willReturn(okJson("{\n" +
+                        "    \"access_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"expires\": " + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + ",\n" +
+                        "    \"refresh_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"refresh_until\": " + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "\n" +
+                        "}").withTransformers("response-template")
+                ));
+    }
+
+    private void then_the_tasks_can_be_polled() {
         wireMockServer.stubFor(get(urlPathMatching(LOG_API_REGEX_PATH))
                 .willReturn(aResponse()
                         .withTransformers("event-log-response-transformer")

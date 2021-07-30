@@ -32,7 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class EventLogSourceTaskTest {
 
     public static final String LOG_API_REGEX_PATH = "/vedsdk/[Ll]og/?";
-    public static final String AUTHORIZE_API_REGEX_PATH = "/vedsdk/[Aa]uthorize/?";
+    public static final String AUTHORIZE_API_REGEX_PATH = "/vedauth/[Aa]uthorize/?";
+    public static final String AUTHORIZE_REFRESH_API_REGEX_PATH = "/vedauth/[Aa]uthorize/token?";
 
     private static final ZonedDateTime TODAY = ZonedDateTime.now();
     private WireMockServer wireMockServer = new WireMockServer(
@@ -137,7 +138,6 @@ public class EventLogSourceTaskTest {
     @Test
     public void as_a_client_I_want_a_token_to_only_generate_once_while_before_token_expiry() {
 
-
         given_the_mock_will_respond_to_auth();
         TppLogSourceTask task = given_a_task_is_setup();
 
@@ -150,17 +150,20 @@ public class EventLogSourceTaskTest {
     }
 
     @Test
-    public void as_a_client_I_want_a_token_to_only_regenerate_while_away_token_expiry() {
+    public void as_a_client_I_want_a_token_to_regenerate_when_a_token_expires() {
         given_the_mock_will_respond_to_auth_with_expired_token();
+        and_given_the_mock_will_respond_to_auth_refresh();
+
         TppLogSourceTask task = given_a_task_is_setup();
 
-        String invalidToken = when_a_token_is_got(task);
-        assertTrue(isNotNullOrBlank(invalidToken));
-        String invalidToken2 = when_a_token_is_got(task);
-        assertTrue(isNotNullOrBlank(invalidToken2));
-        wireMockServer.verify(2, postRequestedFor(urlPathMatching(AUTHORIZE_API_REGEX_PATH)));
-        assertNotEquals(invalidToken, invalidToken2);
+        String expiredToken = when_a_token_is_got(task);
+        assertTrue(isNotNullOrBlank(expiredToken));
+        String newToken = when_a_token_is_got(task);
 
+        assertTrue(isNotNullOrBlank(newToken));
+        wireMockServer.verify(1, postRequestedFor(urlPathMatching(AUTHORIZE_API_REGEX_PATH)));
+        wireMockServer.verify(1, postRequestedFor(urlPathMatching(AUTHORIZE_REFRESH_API_REGEX_PATH)));
+        assertNotEquals(expiredToken, newToken);
     }
 
     @Test
@@ -350,18 +353,39 @@ public class EventLogSourceTaskTest {
         config.put(POLL_INTERVAL, "0");
         config.put(USERNAME_CONFIG, "placeholder_username");
         config.put(PASSWORD_CONFIG, "placeholder_password");
+        config.put(SCOPE_CONFIG, "any");
+        config.put(CLIENT_ID_CONFIG, "venafi-kafka-connect-logs-test");
         return new TppLogSourceConfig(config).returnPropertiesWithDefaultsValuesIfMissing();
     }
 
     private void given_the_mock_will_respond_to_auth() {
         wireMockServer.stubFor(post(urlPathMatching(AUTHORIZE_API_REGEX_PATH))
                 .withRequestBody(equalToJson("{\n" +
-                        "\t\"Username\":\"placeholder_username\",\n" +
-                        "\t\"Password\":\"placeholder_password\"\n" +
+                        "\t\"username\":\"placeholder_username\",\n" +
+                        "\t\"password\":\"placeholder_password\",\n" +
+                        "\t\"client_id\":\"venafi-kafka-connect-logs-test\",\n" +
+                        "\t\"scope\":\"any\"\n" +
                         "}")).withHeader("Content-Type", containing("application/json"))
                 .willReturn(okJson("{\n" +
-                        "    \"APIKey\": \"{{randomValue type='UUID'}}\",\n" +
-                        "    \"ValidUntil\": \"/Date(" + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + "000)/\"\n" +
+                        "    \"access_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"expires\": " + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + ",\n" +
+                        "    \"refresh_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"refresh_until\": " + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "\n" +
+                        "}").withTransformers("response-template")
+                ));
+    }
+
+    private void and_given_the_mock_will_respond_to_auth_refresh() {
+        wireMockServer.stubFor(post(urlPathMatching(AUTHORIZE_REFRESH_API_REGEX_PATH))
+                .withRequestBody(equalToJson("{\n" +
+                        "\t'refresh_token':'${json-unit.any-string}',\n" +
+                        "\t'client_id':'venafi-kafka-connect-logs-test'\n" +
+                        "}")).withHeader("Content-Type", containing("application/json"))
+                .willReturn(okJson("{\n" +
+                        "    \"access_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"expires\": " + LocalDateTime.now().plusMinutes(3).toEpochSecond(ZoneOffset.UTC) + ",\n" +
+                        "    \"refresh_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"refresh_until\": " + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "\n" +
                         "}").withTransformers("response-template")
                 ));
     }
@@ -369,12 +393,16 @@ public class EventLogSourceTaskTest {
     private void given_the_mock_will_respond_to_auth_with_expired_token() {
         wireMockServer.stubFor(post(urlPathMatching(AUTHORIZE_API_REGEX_PATH))
                 .withRequestBody(equalToJson("{\n" +
-                        "\t\"Username\":\"placeholder_username\",\n" +
-                        "\t\"Password\":\"placeholder_password\"\n" +
+                        "\t\"username\":\"placeholder_username\",\n" +
+                        "\t\"password\":\"placeholder_password\",\n" +
+                        "\t\"client_id\":\"venafi-kafka-connect-logs-test\",\n" +
+                        "\t\"scope\":\"any\"\n" +
                         "}")).withHeader("Content-Type", containing("application/json"))
                 .willReturn(okJson("{\n" +
-                        "    \"APIKey\": \"{{randomValue type='UUID'}}\",\n" +
-                        "    \"ValidUntil\": \"/Date(" + LocalDateTime.now().minusMinutes(3).toEpochSecond(ZoneOffset.UTC) + "000)/\"\n" +
+                        "    \"access_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"expires\": " + LocalDateTime.now().minusMinutes(3).toEpochSecond(ZoneOffset.UTC) + ",\n" +
+                        "    \"refresh_token\": \"{{randomValue length=24 type='ALPHANUMERIC'}}\",\n" +
+                        "    \"refresh_until\": " + LocalDateTime.now().plusMinutes(6).toEpochSecond(ZoneOffset.UTC) + "\n" +
                         "}").withTransformers("response-template")
                 ));
     }
@@ -382,8 +410,10 @@ public class EventLogSourceTaskTest {
     private void given_the_mock_will_respond_to_auth_bad_request() {
         wireMockServer.stubFor(post(urlPathMatching(AUTHORIZE_API_REGEX_PATH))
                 .withRequestBody(equalToJson("{\n" +
-                        "\t\"Username\":\"placeholder_username\",\n" +
-                        "\t\"Password\":\"placeholder_password\"\n" +
+                        "\t\"username\":\"placeholder_username\",\n" +
+                        "\t\"password\":\"placeholder_password\",\n" +
+                        "\t\"client_id\":\"venafi-kafka-connect-logs-test\",\n" +
+                        "\t\"scope\":\"any\"\n" +
                         "}")).withHeader("Content-Type", containing("application/json"))
                 .willReturn(badRequest()
                 ));
@@ -405,7 +435,7 @@ public class EventLogSourceTaskTest {
                 .willReturn(aResponse()
                         .withStatus(401)
                         .withBody("{\n" +
-                                "    \"Error\": \"API key '5dfb7fa4-d300-44b5-b192-df8d6e8303df' is not valid. Try /authorize or /authorize/integrated\"\n" +
+                                "    \"Error\": \"Token '/ejyyMD839mI02EZvs8FEQ==' is not valid. Try /vedauth/authorize or vedauth/authorize/token\"\n" +
                                 "}"))
         );
     }

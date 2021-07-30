@@ -18,7 +18,7 @@ public interface TppLog {
     String OFFSET = "OFFSET";
 
     @RequestLine("GET /vedsdk/Log")
-    @Headers({"Content-Type: application/json", "X-Venafi-Api-Key: {token}"})
+    @Headers({"Content-Type: application/json", "Authorization: Bearer {token}"})
     LogResponse getLogs(@Param("token") String token, @QueryMap Map<String, Object> queryMap);
 
     //If we in the future need to send a query Param with +
