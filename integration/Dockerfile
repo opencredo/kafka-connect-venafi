@@ -2,7 +2,7 @@
 FROM wurstmeister/kafka:2.12-2.3.0
 
 # we copy the venafy connector in the container
-COPY target/kafka-connect-venafi-20.4-fat.jar ./venafi-connector/kafka-connect-venafi.jar
+COPY target/kafka-connect-venafi-20.4.1-fat.jar ./venafi-connector/kafka-connect-venafi.jar
 
 # we replace the default connect-standalone.properties so we can properly resolve to our local Kafka docker development
 COPY integration/connect-standalone.properties /opt/kafka/config/
