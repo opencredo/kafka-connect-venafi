@@ -1,0 +1,24 @@
+name: Build Venafi TPP Security Events Kafka Connector
+
+on: [push, pull_request]
+
+jobs:
+  compile:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        java: [8]
+    name: Java ${{ matrix.java }} compile
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v2
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-package: jdk
+          java-version: ${{ matrix.java }}
+      - name: Compile the Project
+        working-directory: github-actions-java-maven
+        run: mvn -B verify
+
