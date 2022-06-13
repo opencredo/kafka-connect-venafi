@@ -16,7 +16,7 @@
     <properties>
         <java.version>1.8</java.version>
         <junit-5.version>5.3.2</junit-5.version>
-        <slf4j.version>1.7.25</slf4j.version>
+        <slf-reload4j.version>1.7.36</slf-reload4j.version>
         <feign.version>10.1.0</feign.version>
         <kafka-connect.version>2.0.1</kafka-connect.version>
         <mockito.version>2.23.4</mockito.version>
@@ -77,8 +77,8 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
+            <artifactId>slf4j-reload4j</artifactId>
+            <version>${slf-reload4j.version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.openfeign</groupId>
