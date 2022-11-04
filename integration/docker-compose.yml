@@ -42,7 +42,7 @@ services:
 
   venafi-connector:
     hostname: venafi-connector
-    image: opencredo/venafi-kafka-connector:20.4.1
+    image: opencredo/venafi-kafka-connector:20.4.2
     depends_on:
       - kafka
 
