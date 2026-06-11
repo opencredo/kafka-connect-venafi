@@ -1,4 +1,8 @@
 # kafka-connect-venafi
+
+> [!NOTE]
+> This repo has been archived and is no longer under development. OpenCredo is now part of [Trifork](https://github.com/trifork).
+
 [![Build Status](https://travis-ci.com/opencredo/kafka-connect-venafi.svg?branch=master)](https://travis-ci.com/opencredo/kafka-connect-venafi)
 
 kafka-connect-venafi is a [Kafka connector](http://kafka.apache.org/documentation.html#connect) for Venafi Trust Protection Platform security events.
